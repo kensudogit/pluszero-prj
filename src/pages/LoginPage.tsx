@@ -73,9 +73,6 @@ export function LoginPage() {
 
   return (
     <div className="login-wrap">
-      <div className="login-page-top">
-        <UsageGuide placement="top" />
-      </div>
       <div className="login-column">
         <div className="login-card">
           <div className="login-brand">
@@ -129,18 +126,20 @@ export function LoginPage() {
                   </li>
                 </ul>
               </details>
-              <p className="login-footer-link">
-                <button
-                  type="button"
-                  className="link-btn"
-                  onClick={() => {
-                    setMode('register')
-                    setError('')
-                  }}
-                >
-                  {j.toggleRegister}
-                </button>
-              </p>
+              <div className="login-footer-actions">
+                <UsageGuide placement="inline">
+                  <button
+                    type="button"
+                    className="link-btn login-footer-register"
+                    onClick={() => {
+                      setMode('register')
+                      setError('')
+                    }}
+                  >
+                    {j.toggleRegister}
+                  </button>
+                </UsageGuide>
+              </div>
             </>
           ) : (
             <>

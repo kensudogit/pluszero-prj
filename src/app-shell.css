@@ -420,15 +420,9 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
   padding: 1rem 1rem 3rem;
   box-sizing: border-box;
-}
-
-.login-page-top {
-  width: 100%;
-  max-width: min(920px, 100%);
-  flex-shrink: 0;
 }
 
 .login-card {
@@ -534,9 +528,13 @@ body {
   padding-left: 1.1rem;
 }
 
-.login-footer-link {
+.login-footer-actions {
   margin: 1rem 0 0;
-  text-align: center;
+}
+
+.login-footer-register {
+  flex-shrink: 0;
+  font-size: 0.88rem;
 }
 
 .login-back-row {
@@ -571,6 +569,126 @@ body {
 .usage-guide--top.usage-guide--top-open {
   border-radius: 18px;
   overflow: hidden;
+}
+
+.usage-guide--inline {
+  border: none;
+  box-shadow: none;
+  background: transparent;
+  border-radius: 0;
+  overflow: visible;
+}
+
+.usage-guide-inline-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem 1rem;
+  width: 100%;
+}
+
+/* Inline trigger: same affordance as .link-btn (??????) */
+.usage-guide-link-inline {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex: 0 1 auto;
+  font-size: 0.88rem;
+  margin-right: 0;
+}
+
+.usage-guide-link-inline .usage-guide-book {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.95;
+}
+
+.usage-guide-link-inline .usage-guide-title {
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.usage-guide-chevron-inline {
+  transition: transform 0.2s ease;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.usage-guide-chevron-inline.open {
+  transform: rotate(180deg);
+}
+
+/* Accordion: 0fr ? 1fr so the panel visibly expands on click */
+.usage-guide-inline-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  width: 100%;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.usage-guide-inline-panel--open {
+  grid-template-rows: 1fr;
+  margin-top: 0.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .usage-guide-inline-panel {
+    transition: none;
+  }
+}
+
+.usage-guide-inline-panel-inner {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.usage-guide--inline .usage-guide-body {
+  border-radius: 12px;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  background: linear-gradient(180deg, #ecfdf5 0%, #e2e8f0 100%);
+  border-top: none;
+  max-height: min(58vh, 420px);
+  padding: 0.85rem 0.85rem 1.1rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.usage-guide--inline .usage-guide-intro {
+  color: #475569;
+}
+
+.usage-guide--inline .usage-guide-section {
+  margin-bottom: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-left: 4px solid #059669;
+  border-radius: 10px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+}
+
+.usage-guide--inline .usage-guide-section:last-child {
+  margin-bottom: 0;
+}
+
+.usage-guide--inline .usage-guide-section-title {
+  color: #0f172a;
+}
+
+.usage-guide--inline .usage-guide-section-title svg {
+  stroke: #059669;
+}
+
+.usage-guide--inline .usage-guide-list {
+  color: #334155;
+}
+
+.usage-guide--inline .usage-guide-list li::marker {
+  color: #059669;
 }
 
 .usage-guide-header {

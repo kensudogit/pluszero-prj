@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, type ReactNode } from 'react'
 import { ja } from '../locales'
 
 function SectionIcon({ name }: { name: string }) {
@@ -73,72 +73,135 @@ function SectionIcon({ name }: { name: string }) {
   }
 }
 
-type Placement = 'default' | 'top'
+type Placement = 'default' | 'top' | 'inline'
 
-export function UsageGuide({ placement = 'default' }: { placement?: Placement }) {
-  const [open, setOpen] = useState(placement === 'top' ? false : true)
+export function UsageGuide({
+  placement = 'default',
+  children,
+}: {
+  placement?: Placement
+  children?: ReactNode
+}) {
+  const [open, setOpen] = useState(
+    () => placement === 'top' || placement === 'inline' ? false : true
+  )
   const ug = ja.usageGuide
 
-  const rootClass =
+  const rootClassDefault =
     placement === 'top'
       ? `usage-guide usage-guide--top ${open ? 'usage-guide--top-open' : ''}`
       : 'usage-guide'
 
+  const guideSections = (
+    <>
+      <p className="usage-guide-intro">{ug.intro}</p>
+      {ug.sections.map((sec) => (
+        <section key={sec.n} className="usage-guide-section">
+          <h3 className="usage-guide-section-title">
+            <span className="usage-guide-num">{sec.n}</span>
+            <SectionIcon name={sec.icon} />
+            <span>{sec.title}</span>
+          </h3>
+          <ul className="usage-guide-list">
+            {sec.bullets.map((line, i) => (
+              <li key={i}>{line}</li>
+            ))}
+          </ul>
+        </section>
+      ))}
+    </>
+  )
+
+  const guideBody = open ? <div className="usage-guide-body">{guideSections}</div> : null
+
+  const headerInner = (
+    <>
+      <span className="usage-guide-header-inner">
+        <svg className="usage-guide-book" width="20" height="20" viewBox="0 0 24 24" aria-hidden>
+          <path
+            fill="currentColor"
+            d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h11V5H6zm3 2h6v2H9V7zm0 4h6v2H9v-2z"
+          />
+        </svg>
+        <span className="usage-guide-title">{ug.title}</span>
+      </span>
+      {placement === 'inline' ? (
+        <svg
+          className={`usage-guide-chevron-inline ${open ? 'open' : ''}`}
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          aria-hidden
+        >
+          <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+        </svg>
+      ) : placement === 'top' ? (
+        <span className="usage-guide-chevron-wrap" aria-hidden>
+          <svg className={`usage-guide-chevron ${open ? 'open' : ''}`} width="18" height="18" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+          </svg>
+        </span>
+      ) : (
+        <svg
+          className={`usage-guide-chevron ${open ? 'open' : ''}`}
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          aria-hidden
+        >
+          <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+        </svg>
+      )}
+    </>
+  )
+
+  if (placement === 'inline') {
+    return (
+      <div className={`usage-guide usage-guide--inline ${open ? 'usage-guide--inline-open' : ''}`}>
+        <div className="usage-guide-inline-row">
+          <button
+            type="button"
+            className="link-btn usage-guide-link-inline"
+            onClick={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              setOpen((v) => !v)
+            }}
+            aria-expanded={open}
+            aria-controls="usage-guide-inline-panel"
+            id="usage-guide-inline-trigger"
+          >
+            {headerInner}
+          </button>
+          {children}
+        </div>
+        <div
+          id="usage-guide-inline-panel"
+          className={`usage-guide-inline-panel ${open ? 'usage-guide-inline-panel--open' : ''}`}
+          role="region"
+          aria-labelledby="usage-guide-inline-trigger"
+          aria-hidden={!open}
+          {...(!open ? { inert: true as const } : {})}
+        >
+          <div className="usage-guide-inline-panel-inner">
+            <div className="usage-guide-body">{guideSections}</div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
-    <div className={rootClass}>
+    <div className={rootClassDefault}>
       <button
         type="button"
         className="usage-guide-header"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
       >
-        <span className="usage-guide-header-inner">
-          <svg className="usage-guide-book" width="20" height="20" viewBox="0 0 24 24" aria-hidden>
-            <path
-              fill="currentColor"
-              d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zm0 2v14h11V5H6zm3 2h6v2H9V7zm0 4h6v2H9v-2z"
-            />
-          </svg>
-          <span className="usage-guide-title">{ug.title}</span>
-        </span>
-        {placement === 'top' ? (
-          <span className="usage-guide-chevron-wrap" aria-hidden>
-            <svg className={`usage-guide-chevron ${open ? 'open' : ''}`} width="18" height="18" viewBox="0 0 24 24">
-              <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-            </svg>
-          </span>
-        ) : (
-          <svg
-            className={`usage-guide-chevron ${open ? 'open' : ''}`}
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            aria-hidden
-          >
-            <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-          </svg>
-        )}
+        {headerInner}
       </button>
-
-      {open ? (
-        <div className="usage-guide-body">
-          <p className="usage-guide-intro">{ug.intro}</p>
-          {ug.sections.map((sec) => (
-            <section key={sec.n} className="usage-guide-section">
-              <h3 className="usage-guide-section-title">
-                <span className="usage-guide-num">{sec.n}</span>
-                <SectionIcon name={sec.icon} />
-                <span>{sec.title}</span>
-              </h3>
-              <ul className="usage-guide-list">
-                {sec.bullets.map((line, i) => (
-                  <li key={i}>{line}</li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      ) : null}
+      {guideBody}
     </div>
   )
 }
