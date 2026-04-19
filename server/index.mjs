@@ -1,6 +1,8 @@
 /**
  * AI API proxy - OPENAI_API_KEY or AI_API_KEY (Railway Variables).
- * Optional: OPENAI_BASE_URL, OPENAI_MODEL (default gpt-4o-mini).
+ * Optional: OPENAI_BASE_URL, OPENAI_MODEL (default gpt-4o-mini),
+ * OPENAI_VISION_MODEL (default OPENAI_MODEL or gpt-4o-mini),
+ * OPENAI_TRANSCRIBE_MODEL (default whisper-1).
  * With NODE_ENV=production, serves ../dist and SPA fallback.
  */
 import cors from 'cors'
@@ -82,12 +84,167 @@ async function chatComplete(system, user, options = {}) {
   return out
 }
 
+async function chatCompleteRaw(messages, options = {}) {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    const err = new Error(
+      'Set OPENAI_API_KEY or AI_API_KEY in Railway Variables (or .env locally).'
+    )
+    err.code = 'NO_KEY'
+    throw err
+  }
+
+  const base = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '')
+  const model = process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  const max_tokens = options.max_tokens ?? 2048
+
+  const r = await fetch(`${base}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      temperature: options.temperature ?? 0.35,
+      max_tokens,
+      messages,
+    }),
+  })
+
+  if (!r.ok) {
+    const text = await r.text()
+    const err = new Error(`LLM API error (${r.status}): ${text.slice(0, 500)}`)
+    err.code = 'UPSTREAM'
+    throw err
+  }
+
+  const j = await r.json()
+  const out = j.choices?.[0]?.message?.content?.trim() ?? ''
+  if (!out) {
+    const err = new Error('Empty model response.')
+    err.code = 'EMPTY'
+    throw err
+  }
+  return out
+}
+
+async function visionAnalyze(imageBase64, mimeType, userPrompt) {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    const err = new Error(
+      'Set OPENAI_API_KEY or AI_API_KEY in Railway Variables (or .env locally).'
+    )
+    err.code = 'NO_KEY'
+    throw err
+  }
+
+  const base = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '')
+  const visionModel =
+    process.env.OPENAI_VISION_MODEL || process.env.OPENAI_MODEL || 'gpt-4o-mini'
+  const prompt =
+    typeof userPrompt === 'string' && userPrompt.trim()
+      ? userPrompt.trim()
+      : '????????????????????????????????????'
+
+  const r = await fetch(`${base}/chat/completions`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model: visionModel,
+      temperature: 0.3,
+      max_tokens: 2000,
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You describe images for Japanese business users. Be precise; cite readable text from the image when present.',
+        },
+        {
+          role: 'user',
+          content: [
+            { type: 'text', text: prompt },
+            {
+              type: 'image_url',
+              image_url: {
+                url: `data:${mimeType || 'image/png'};base64,${imageBase64}`,
+              },
+            },
+          ],
+        },
+      ],
+    }),
+  })
+
+  if (!r.ok) {
+    const text = await r.text()
+    const err = new Error(`Vision API error (${r.status}): ${text.slice(0, 500)}`)
+    err.code = 'UPSTREAM'
+    throw err
+  }
+
+  const j = await r.json()
+  const out = j.choices?.[0]?.message?.content?.trim() ?? ''
+  if (!out) {
+    const err = new Error('Empty vision response.')
+    err.code = 'EMPTY'
+    throw err
+  }
+  return out
+}
+
+async function transcribeFromBase64(audioBase64, mimeType) {
+  const apiKey = getApiKey()
+  if (!apiKey) {
+    const err = new Error(
+      'Set OPENAI_API_KEY or AI_API_KEY in Railway Variables (or .env locally).'
+    )
+    err.code = 'NO_KEY'
+    throw err
+  }
+
+  const base = (process.env.OPENAI_BASE_URL || 'https://api.openai.com/v1').replace(/\/$/, '')
+  const buf = Buffer.from(audioBase64, 'base64')
+  const blob = new Blob([buf], { type: mimeType || 'audio/webm' })
+  const form = new FormData()
+  form.append('file', blob, 'recording.webm')
+  form.append('model', process.env.OPENAI_TRANSCRIBE_MODEL || 'whisper-1')
+  form.append('language', 'ja')
+
+  const r = await fetch(`${base}/audio/transcriptions`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: form,
+  })
+
+  if (!r.ok) {
+    const text = await r.text()
+    const err = new Error(`Transcription error (${r.status}): ${text.slice(0, 500)}`)
+    err.code = 'UPSTREAM'
+    throw err
+  }
+
+  const j = await r.json()
+  const out = typeof j.text === 'string' ? j.text.trim() : ''
+  if (!out) {
+    const err = new Error('Empty transcription.')
+    err.code = 'EMPTY'
+    throw err
+  }
+  return out
+}
+
 function run() {
   const app = express()
   const port = Number(process.env.PORT || 8787)
 
   app.use(cors({ origin: true, credentials: true }))
-  app.use(express.json({ limit: '2mb' }))
+  app.use(express.json({ limit: '15mb' }))
 
   app.get('/api/health', (_req, res) => {
     res.json({
@@ -183,6 +340,111 @@ Include greeting, body, closing; optional placeholders like [company name].`
       const user = `Case title: ${title}\n${notes ? `Notes:\n${notes}` : ''}`
       const answer = await chatComplete(system, user)
       res.json({ answer })
+    } catch (e) {
+      const status = e.code === 'NO_KEY' ? 503 : 500
+      res.status(status).json({ error: e.message })
+    }
+  })
+
+  app.post('/api/ai/chat', async (req, res) => {
+    try {
+      const raw = req.body?.messages
+      if (!Array.isArray(raw) || raw.length === 0) {
+        return res.status(400).json({ error: 'messages array is required' })
+      }
+
+      const trimmed = raw
+        .filter(
+          (m) =>
+            m &&
+            (m.role === 'user' || m.role === 'assistant') &&
+            typeof m.content === 'string' &&
+            m.content.trim()
+        )
+        .slice(-24)
+        .map((m) => ({
+          role: m.role,
+          content: m.content.slice(0, 48000),
+        }))
+
+      if (trimmed.length === 0) {
+        return res.status(400).json({ error: 'valid user/assistant messages required' })
+      }
+
+      const messages = [
+        {
+          role: 'system',
+          content:
+            'You are the PlusZero CRM AI assistant. Reply in clear Japanese unless the user requests another language. Be concise and actionable.',
+        },
+        ...trimmed,
+      ]
+
+      const answer = await chatCompleteRaw(messages, { max_tokens: 2500 })
+      res.json({ answer })
+    } catch (e) {
+      const status = e.code === 'NO_KEY' ? 503 : 500
+      res.status(status).json({ error: e.message })
+    }
+  })
+
+  app.post('/api/ai/summarize', async (req, res) => {
+    try {
+      const text = String(req.body?.text ?? '').trim()
+      if (!text) return res.status(400).json({ error: 'text is required' })
+
+      const system = `You summarize internal/business documents in Japanese.
+Use short sections with bullets. Capture decisions, dates, owners, risks, and action items when present.
+If the input is too short, still give a minimal summary.`
+
+      const answer = await chatComplete(system, `Document text:\n${text}`, { max_tokens: 2200 })
+      res.json({ answer })
+    } catch (e) {
+      const status = e.code === 'NO_KEY' ? 503 : 500
+      res.status(status).json({ error: e.message })
+    }
+  })
+
+  app.post('/api/ai/vision', async (req, res) => {
+    try {
+      const imageBase64 = String(req.body?.imageBase64 ?? '').trim()
+      const mimeType = String(req.body?.mimeType ?? 'image/png').trim() || 'image/png'
+      const prompt = req.body?.prompt != null ? String(req.body.prompt) : ''
+      if (!imageBase64) return res.status(400).json({ error: 'imageBase64 is required' })
+
+      const answer = await visionAnalyze(imageBase64, mimeType, prompt)
+      res.json({ answer })
+    } catch (e) {
+      const status = e.code === 'NO_KEY' ? 503 : 500
+      res.status(status).json({ error: e.message })
+    }
+  })
+
+  app.post('/api/ai/automation', async (req, res) => {
+    try {
+      const task = String(req.body?.task ?? '').trim()
+      if (!task) return res.status(400).json({ error: 'task is required' })
+
+      const system = `You are a business automation advisor for Japanese SMB teams using CRM and internal tools.
+Respond in Japanese with markdown. Give: (1) recommended workflow steps (2) tooling ideas (3) checklist / risks (4) KPI to track.
+Stay practical and short; assume limited IT resources.`
+
+      const answer = await chatComplete(system, `Goal / situation:\n${task}`, { max_tokens: 2200 })
+      res.json({ answer })
+    } catch (e) {
+      const status = e.code === 'NO_KEY' ? 503 : 500
+      res.status(status).json({ error: e.message })
+    }
+  })
+
+  app.post('/api/ai/transcribe', async (req, res) => {
+    try {
+      const audioBase64 = String(req.body?.audioBase64 ?? '').trim()
+      const mimeType = String(req.body?.mimeType ?? 'audio/webm').trim() || 'audio/webm'
+      if (!audioBase64) return res.status(400).json({ error: 'audioBase64 is required' })
+
+      const text = await transcribeFromBase64(audioBase64, mimeType)
+      res.json({ text })
     } catch (e) {
       const status = e.code === 'NO_KEY' ? 503 : 500
       res.status(status).json({ error: e.message })

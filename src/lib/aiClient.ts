@@ -50,3 +50,5 @@ export async function postAiJson<T>(
 export type FaqResult = { answer: string }
 export type DocResult = { answer: string }
 export type TextResult = { answer: string }
+export type ChatApiResult = { answer: string }
+export type TranscribeResult = { text: string }

@@ -241,6 +241,66 @@ body {
   color: var(--shell-accent);
 }
 
+.ai-service-tabs {
+  flex-wrap: wrap;
+}
+
+.ai-chat-panel .ai-chat-log {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  max-height: min(52vh, 480px);
+  overflow-y: auto;
+  margin-bottom: 0.75rem;
+  padding: 0.35rem;
+}
+
+.ai-chat-bubble {
+  align-self: flex-start;
+  max-width: min(100%, 640px);
+}
+
+.ai-chat-bubble.user {
+  align-self: flex-end;
+}
+
+.ai-chat-bubble.user .portal-pre {
+  border-color: rgba(112, 212, 255, 0.35);
+}
+
+.ai-chat-role {
+  font-size: 0.72rem;
+  color: var(--shell-muted);
+  margin-bottom: 0.25rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.ai-chat-pre {
+  margin-top: 0;
+}
+
+.ai-chat-input-row .ai-chat-field {
+  width: 100%;
+  resize: vertical;
+}
+
+.ai-chat-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.ai-chat-hint {
+  margin-top: -0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.ai-voice-block {
+  margin-bottom: 1.25rem;
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;
