@@ -3,6 +3,7 @@ import { useAppData } from '../contexts/DataContext'
 import { useNotifications } from '../contexts/NotificationContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
 import { canImportCsv } from '../lib/permissions'
+import { interpolate, ja } from '../locales'
 import type { AppData, CaseRecord, CustomerRecord, TaskRecord } from '../types'
 
 function isAppData(x: unknown): x is AppData {
@@ -12,6 +13,7 @@ function isAppData(x: unknown): x is AppData {
 }
 
 export function DataExchangePage() {
+  const j = ja.dataExchange
   const { user } = useAuth()
   const { data, upsertCase, upsertCustomer, upsertTask, replaceAll } = useAppData()
   const { push } = useNotifications()
@@ -23,7 +25,7 @@ export function DataExchangePage() {
       headers.map((h) => String((c as Record<string, unknown>)[h] ?? ''))
     )
     downloadBlob(`cases_${Date.now()}.csv`, toCsv(headers, rows), 'text/csv;charset=utf-8')
-    push('Export complete', 'Cases CSV downloaded.')
+    push(j.notifyExportCases, j.notifyExportCasesBody)
   }
 
   function importCases(file: File) {
@@ -49,7 +51,7 @@ export function DataExchangePage() {
         upsertCase(row)
         n++
       }
-      push('Import complete', `${n} case row(s) merged.`)
+      push(j.notifyImportCases, interpolate(j.notifyImportCasesBody, { n }))
     }
     reader.readAsText(file)
   }
@@ -75,7 +77,7 @@ export function DataExchangePage() {
         upsertCustomer(row)
         n++
       }
-      push('Import complete', `${n} customer row(s) merged.`)
+      push(j.notifyImportCustomers, interpolate(j.notifyImportCustomersBody, { n }))
     }
     reader.readAsText(file)
   }
@@ -101,7 +103,7 @@ export function DataExchangePage() {
         upsertTask(row)
         n++
       }
-      push('Import complete', `${n} task row(s) merged.`)
+      push(j.notifyImportTasks, interpolate(j.notifyImportTasksBody, { n }))
     }
     reader.readAsText(file)
   }
@@ -109,7 +111,7 @@ export function DataExchangePage() {
   function backupJson() {
     const blob = JSON.stringify(data, null, 2)
     downloadBlob(`backup_${Date.now()}.json`, blob, 'application/json')
-    push('Backup', 'JSON backup downloaded.')
+    push(j.notifyBackup, j.notifyBackupBody)
   }
 
   function restoreJson(file: File) {
@@ -119,13 +121,13 @@ export function DataExchangePage() {
       try {
         const parsed: unknown = JSON.parse(String(reader.result ?? ''))
         if (!isAppData(parsed)) {
-          push('Error', 'Invalid backup shape (need cases, tasks, customers arrays).')
+          push(j.notifyRestoreBad, j.notifyRestoreBadShape)
           return
         }
         replaceAll(parsed)
-        push('Restore complete', 'Data replaced from backup.')
+        push(j.notifyRestoreOk, j.notifyRestoreOkBody)
       } catch {
-        push('Error', 'Could not parse JSON.')
+        push(j.notifyRestoreBad, j.notifyRestoreBadParse)
       }
     }
     reader.readAsText(file)
@@ -134,38 +136,36 @@ export function DataExchangePage() {
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Data exchange</h1>
-        <p className="page-desc">CSV column reference and bulk tools (admin / manager).</p>
+        <h1>{j.title}</h1>
+        <p className="page-desc">{j.desc}</p>
       </header>
 
       <section className="card prose">
-        <h2>CSV columns</h2>
+        <h2>{j.csvColumnsTitle}</h2>
         <ul>
           <li>
-            <strong>Cases</strong>: id, title, customerId, status (draft | active | closed), revenue, cost,
-            period (YYYY-MM), updatedAt (ISO)
+            <strong>{ja.nav.cases}</strong>: {j.csvCasesDesc}
           </li>
           <li>
-            <strong>Customers</strong>: id, name, company, email, phone, note
+            <strong>{ja.nav.customers}</strong>: {j.csvCustomersDesc}
           </li>
           <li>
-            <strong>Tasks</strong>: id, title, caseId (optional), status (todo | doing | done), dueDate
-            (ISO or empty), assigneeUserId (optional)
+            <strong>{ja.nav.tasks}</strong>: {j.csvTasksDesc}
           </li>
         </ul>
       </section>
 
       <section className="card-grid">
         <div className="card">
-          <h3>Cases CSV</h3>
-          <p className="muted">Export is also on the Cases screen.</p>
+          <h3>{j.cardCasesCsv}</h3>
+          <p className="muted">{j.cardCasesHint}</p>
           <div className="btn-row">
             <button type="button" className="btn secondary" onClick={exportCases}>
-              Download cases
+              {j.downloadCases}
             </button>
             {canIn ? (
               <label className="btn primary file-btn">
-                Import
+                {j.importBtn}
                 <input
                   type="file"
                   accept=".csv,text/csv"
@@ -181,11 +181,11 @@ export function DataExchangePage() {
           </div>
         </div>
         <div className="card">
-          <h3>Customers CSV</h3>
+          <h3>{j.cardCustomersCsv}</h3>
           <div className="btn-row">
             {canIn ? (
               <label className="btn primary file-btn">
-                Import
+                {j.importBtn}
                 <input
                   type="file"
                   accept=".csv,text/csv"
@@ -198,16 +198,16 @@ export function DataExchangePage() {
                 />
               </label>
             ) : (
-              <p className="muted">No permission.</p>
+              <p className="muted">{ja.common.permissionDenied}</p>
             )}
           </div>
         </div>
         <div className="card">
-          <h3>Tasks CSV</h3>
+          <h3>{j.cardTasksCsv}</h3>
           <div className="btn-row">
             {canIn ? (
               <label className="btn primary file-btn">
-                Import
+                {j.importBtn}
                 <input
                   type="file"
                   accept=".csv,text/csv"
@@ -220,22 +220,22 @@ export function DataExchangePage() {
                 />
               </label>
             ) : (
-              <p className="muted">No permission.</p>
+              <p className="muted">{ja.common.permissionDenied}</p>
             )}
           </div>
         </div>
       </section>
 
       <section className="card">
-        <h2>Full backup (JSON)</h2>
-        <p className="muted">Snapshot cases, customers, and tasks together.</p>
+        <h2>{j.backupTitle}</h2>
+        <p className="muted">{j.backupDesc}</p>
         <div className="btn-row">
           <button type="button" className="btn secondary" onClick={backupJson}>
-            Download JSON
+            {j.downloadJson}
           </button>
           {canIn ? (
             <label className="btn primary file-btn">
-              Restore from file
+              {j.restoreJson}
               <input
                 type="file"
                 accept="application/json,.json"

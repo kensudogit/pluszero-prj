@@ -13,8 +13,10 @@ import { useAuth } from '../contexts/AuthContext'
 import { useAppData } from '../contexts/DataContext'
 import { yen } from '../lib/format'
 import { canViewFinanceDetail, canViewRevenueOnly } from '../lib/permissions'
+import { interpolate, ja } from '../locales'
 
 export function DashboardPage() {
+  const j = ja.dashboard
   const { user } = useAuth()
   const {
     data: { cases, tasks },
@@ -60,20 +62,25 @@ export function DashboardPage() {
   const detail = canViewFinanceDetail(role)
   const revenueOnly = canViewRevenueOnly(role)
 
+  const costProfitLine = interpolate(j.kpiCostProfitDetail, {
+    cost: yen.format(totals.cost),
+    profit: yen.format(totals.profit),
+  })
+
   return (
     <div className="page">
       <header className="page-header">
-        <h1>Dashboard</h1>
-        <p className="page-desc">Overview of pipeline, tasks, and financials.</p>
+        <h1>{j.title}</h1>
+        <p className="page-desc">{j.desc}</p>
       </header>
 
       <section className="card-grid">
         <div className="card kpi">
-          <div className="kpi-label">Cases</div>
+          <div className="kpi-label">{j.kpiCases}</div>
           <div className="kpi-value">{cases.length}</div>
         </div>
         <div className="card kpi">
-          <div className="kpi-label">Tasks (todo / doing / done)</div>
+          <div className="kpi-label">{j.kpiTasks}</div>
           <div className="kpi-value compact">
             {taskStats.todo} / {taskStats.doing} / {taskStats.done}
           </div>
@@ -81,43 +88,44 @@ export function DashboardPage() {
         {detail ? (
           <>
             <div className="card kpi">
-              <div className="kpi-label">Revenue (total)</div>
+              <div className="kpi-label">{j.kpiRevenue}</div>
               <div className="kpi-value">{yen.format(totals.revenue)}</div>
             </div>
             <div className="card kpi">
-              <div className="kpi-label">Cost / profit</div>
-              <div className="kpi-sub">
-                Cost {yen.format(totals.cost)} / Profit {yen.format(totals.profit)}
-              </div>
+              <div className="kpi-label">{j.kpiCostProfit}</div>
+              <div className="kpi-sub">{costProfitLine}</div>
             </div>
           </>
         ) : revenueOnly ? (
           <div className="card kpi wide">
-            <div className="kpi-label">Revenue (total)</div>
+            <div className="kpi-label">{j.kpiRevenue}</div>
             <div className="kpi-value">{yen.format(totals.revenue)}</div>
           </div>
         ) : (
           <div className="card muted wide">
-            <p>Financial KPIs are hidden for your role.</p>
+            <p>{j.kpiFinanceHidden}</p>
           </div>
         )}
       </section>
 
       {showFinance ? (
         <section className="card chart-card">
-          <h2>{revenueOnly ? 'Revenue by month' : 'Revenue, cost & profit by month'}</h2>
+          <h2>{revenueOnly ? j.chartRevenueOnly : j.chartFull}</h2>
           <div className="chart-box">
             <ResponsiveContainer width="100%" height={320}>
               <BarChart data={chartRows} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
                 <CartesianGrid strokeDasharray="3 3" opacity={0.25} />
                 <XAxis dataKey="period" tick={{ fontSize: 12 }} />
-                <YAxis tickFormatter={(v) => `${Math.round(Number(v) / 10000)}w`} tick={{ fontSize: 11 }} />
+                <YAxis
+                  tickFormatter={(v) => `${Math.round(Number(v) / 10000)}${j.chartTickUnit}`}
+                  tick={{ fontSize: 11 }}
+                />
                 <Tooltip
                   formatter={(value, name) => [
                     yen.format(typeof value === 'number' ? value : Number(value)),
                     chartSeriesLabel(String(name)),
                   ]}
-                  labelFormatter={(l) => `Month: ${l}`}
+                  labelFormatter={(l) => `${ja.common.monthLabel}${l}`}
                 />
                 <Legend formatter={(name) => chartSeriesLabel(String(name))} />
                 <Bar dataKey="revenue" name="revenue" fill="var(--chart-revenue)" radius={[4, 4, 0, 0]} />
@@ -133,8 +141,8 @@ export function DashboardPage() {
         </section>
       ) : (
         <section className="card">
-          <h2>Summary</h2>
-          <p className="muted">Use Cases and Tasks to drive work. Charts are available to managers and above.</p>
+          <h2>{j.summaryTitle}</h2>
+          <p className="muted">{j.summaryDesc}</p>
         </section>
       )}
     </div>
@@ -142,10 +150,11 @@ export function DashboardPage() {
 }
 
 function chartSeriesLabel(name: string) {
+  const j = ja.dashboard
   const map: Record<string, string> = {
-    revenue: 'Revenue',
-    cost: 'Cost',
-    profit: 'Profit',
+    revenue: j.seriesRevenue,
+    cost: j.seriesCost,
+    profit: j.seriesProfit,
   }
   return map[name] ?? name
 }

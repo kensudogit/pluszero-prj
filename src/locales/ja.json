@@ -1,0 +1,251 @@
+{
+  "nav": {
+    "dashboard": "ダッシュボード",
+    "cases": "案件",
+    "tasks": "タスク",
+    "customers": "顧客",
+    "data": "データ連携",
+    "notifications": "通知"
+  },
+  "roles": {
+    "admin": "管理者",
+    "manager": "マネージャー",
+    "sales": "営業",
+    "staff": "スタッフ"
+  },
+  "common": {
+    "signOut": "ログアウト",
+    "cancel": "キャンセル",
+    "save": "保存",
+    "edit": "編集",
+    "delete": "削除",
+    "exportCsv": "CSVエクスポート",
+    "importCsv": "CSVインポート",
+    "viewOnly": "閲覧のみ",
+    "dash": "-",
+    "company": "会社名",
+    "contact": "担当者名",
+    "email": "メール",
+    "phone": "電話",
+    "note": "メモ",
+    "period": "計上朜",
+    "monthLabel": "月:",
+    "none": "なし",
+    "unassigned": "未割当",
+    "permissionDenied": "権限がありません。"
+  },
+  "login": {
+    "title": "PlusZero CRM",
+    "lead": "デモアカウントでログインしてください。",
+    "email": "メールアドレス",
+    "password": "パスワード",
+    "submit": "ログイン",
+    "errorInvalid": "メールアドレスまたはパスワードが正しくありません。",
+    "demoSummary": "デモユーザー",
+    "notifySignedInTitle": "ログインしました",
+    "notifySignedInBody": "ようこそ — {{email}}"
+  },
+  "dashboard": {
+    "title": "ダッシュボード",
+    "desc": "案件・タスク・財務の概要です。",
+    "kpiCases": "案件数",
+    "kpiTasks": "タスク（未 / 進 / 完）",
+    "kpiRevenue": "売上（合計）",
+    "kpiCostProfit": "原価 / 利益",
+    "kpiCostProfitDetail": "原価 {{cost}} / 利益 {{profit}}",
+    "kpiFinanceHidden": "お使いの権限では財勔KPIは表示されません。",
+    "chartRevenueOnly": "売上の推移（月次）",
+    "chartFull": "売上・原価・利益（月次）",
+    "seriesRevenue": "売上",
+    "seriesCost": "原価",
+    "seriesProfit": "利益",
+    "summaryTitle": "サマリー",
+    "summaryDesc": "案件・タスクから業務を進めてください。グラフはマネージャー以上で利用できます。",
+    "chartTickUnit": "万"
+  },
+  "cases": {
+    "title": "案件一覧",
+    "desc": "売上・原価はダッシュボードに反映されます。",
+    "newCase": "新規案件",
+    "colTitle": "案件名",
+    "colCustomer": "顧客",
+    "colStatus": "状態",
+    "colRevenue": "売上",
+    "colCost": "原価",
+    "colProfit": "利益",
+    "colPeriod": "計上月",
+    "modalNew": "案件を追加",
+    "modalEdit": "案件を編集",
+    "fieldTitle": "案件名",
+    "fieldCustomer": "顧客",
+    "fieldStatus": "状態",
+    "fieldRevenue": "売上（円）",
+    "fieldCost": "原価（円）",
+    "fieldPeriod": "計上月（YYYY-MM）",
+    "statusDraft": "ドラフト",
+    "statusActive": "進行中",
+    "statusClosed": "完了"
+  },
+  "tasks": {
+    "title": "タスク",
+    "descAll": "全員のタスクを管理できます。",
+    "descLimited": "自分が担当または未割当のタスクが表示されます。",
+    "newTask": "新規タスク",
+    "colTitle": "タイトル",
+    "colCase": "案件",
+    "colStatus": "状態",
+    "colDue": "期限",
+    "colAssignee": "担当",
+    "modalNew": "タスクを追加",
+    "modalEdit": "タスクを編集",
+    "fieldTitle": "タイトル",
+    "fieldCaseOptional": "案件（任意）",
+    "fieldStatus": "状態",
+    "fieldDue": "期限",
+    "fieldAssignee": "担当",
+    "hintAssignee": "担当の変更はマネージャー以上が行えます。自分のタスクは編集できます。",
+    "statusTodo": "未着手",
+    "statusDoing": "進行中",
+    "statusDone": "完了"
+  },
+  "customers": {
+    "title": "顧客",
+    "desc": "案件やCSVと連携するマスタです。",
+    "newCustomer": "新規顧客",
+    "colCompany": "会社名",
+    "colContact": "担当者名",
+    "modalNew": "顧客を追加",
+    "modalEdit": "顧客を編集",
+    "fieldCompany": "会社名",
+    "fieldContact": "担当者名",
+    "fieldEmail": "メール",
+    "fieldPhone": "電話",
+    "fieldNote": "メモ"
+  },
+  "dataExchange": {
+    "title": "データ連携",
+    "desc": "CSVの列仕様と一括操作です（管理者・マネージャー向け）。",
+    "csvColumnsTitle": "CSVの列",
+    "csvCasesDesc": "id, title, customerId, status（draft | active | closed）, revenue, cost, period（YYYY-MM）, updatedAt（ISO）",
+    "csvCustomersDesc": "id, name, company, email, phone, note",
+    "csvTasksDesc": "id, title, caseId（任意）, status（todo | doing | done）, dueDate（ISOまたは空）, assigneeUserId（任意）",
+    "cardCasesCsv": "案件CSV",
+    "cardCasesHint": "エクスポートは案件画面でも行えます。",
+    "downloadCases": "案件をダウンロード",
+    "cardCustomersCsv": "顧客CSV",
+    "cardTasksCsv": "タスクCSV",
+    "importBtn": "取り込み",
+    "backupTitle": "フルバックアップ（JSON）",
+    "backupDesc": "案件・顧客・タスクをまとめて保存・復元します。",
+    "downloadJson": "JSONをダウンロード",
+    "restoreJson": "ファイルから復元",
+    "notifyExportCases": "エクスポート完了",
+    "notifyExportCasesBody": "案件CSVをダウンロードしました。",
+    "notifyImportCases": "インポート完了",
+    "notifyImportCasesBody": "案件を {{n}} 件マージしました。",
+    "notifyImportCustomers": "インポート完了",
+    "notifyImportCustomersBody": "顧客を {{n}} 件マージしました。",
+    "notifyImportTasks": "インポート完了",
+    "notifyImportTasksBody": "タスクを {{n}} 件マージしました。",
+    "notifyBackup": "バックアップ",
+    "notifyBackupBody": "JSONバックアップをダウンロードしました。",
+    "notifyRestoreOk": "復元完了",
+    "notifyRestoreOkBody": "バックアップからデータを置き換えました。",
+    "notifyRestoreBad": "エラー",
+    "notifyRestoreBadShape": "バックアップの形式が不正です（cases / tasks / customers が必要です）。",
+    "notifyRestoreBadParse": "JSONを解析できませんでした。"
+  },
+  "notifications": {
+    "title": "通知",
+    "desc": "ログインやデータ取り込みなどの履歴が届きます。",
+    "markAllRead": "すべて既読",
+    "empty": "通知はまだありません。",
+    "markRead": "既読にする"
+  },
+  "usageGuide": {
+    "title": "利用手順",
+    "intro": "PlusZero CRM の各機能の使い方です。初めてお使いになる際は、上から順にご確認ください。",
+    "sections": [
+      {
+        "n": 1,
+        "title": "ログイン認証",
+        "icon": "lock",
+        "bullets": [
+          "メールアドレスとパスワードを入力し、「ログイン」をクリックします。",
+          "デモは「デモユーザー」を開いて `admin@demo.com` / `demo123` などをご利用ください。",
+          "セッションはブラウザ内に保存されます（検証用デモです）。"
+        ]
+      },
+      {
+        "n": 2,
+        "title": "案件一覧",
+        "icon": "briefcase",
+        "bullets": [
+          "左メニュー「案件」から一覧します。",
+          "「新規案件」で作成、行の「編集」「削除」で更新できます（権限により表示が異なります）。",
+          "売上・原価・利益の列はロールに応じて表示されます。"
+        ]
+      },
+      {
+        "n": 3,
+        "title": "売上・原価・利益の可視化",
+        "icon": "chart",
+        "bullets": [
+          "「ダッシュボード」でKPIカードと月次グラフを確認します。",
+          "管理者・マネージャーは売上・原価・利益、営業は売上のみなど、表示が変わります。",
+          "スタッフは財務チャートが非表示の場合があります。"
+        ]
+      },
+      {
+        "n": 4,
+        "title": "タスク管理",
+        "icon": "task",
+        "bullets": [
+          "「タスク」で一覧・追加・編集を行います。",
+          "「新規タスク」から案件との紐づけ、期限、担当を設定できます。",
+          "担当変更はマネージャー以上に限定される場合があります。"
+        ]
+      },
+      {
+        "n": 5,
+        "title": "顧客管理",
+        "icon": "users",
+        "bullets": [
+          "「顧客」でマスタを編集します。",
+          "案件やCSVと連携するため、先に登録しておくとスムーズです。",
+          "「CSVエクスポート」「CSVインポート」は権限により利用できます。"
+        ]
+      },
+      {
+        "n": 6,
+        "title": "CSVの入出力",
+        "icon": "csv",
+        "bullets": [
+          "各画面のCSVボタン、または「データ連携」から一括操作できます。インポートは管理者・マネージャーなどに限定されます。",
+          "「データ連携」で列定義を確認し、JSONのバックアップ・復元も行えます。",
+          "取り込み時、同じIDの行は上書きマージされます。"
+        ]
+      },
+      {
+        "n": 7,
+        "title": "権限別メニュー表示",
+        "icon": "shield",
+        "bullets": [
+          "左サイドバーはロール（管理者 / マネージャー / 営業 / スタッフ）により異なります。",
+          "例：スタッフは「顧客」「データ連携」が出ない場合があります。",
+          "許可のないURLへはダッシュボードへ戻ります。"
+        ]
+      },
+      {
+        "n": 8,
+        "title": "通知機能",
+        "icon": "bell",
+        "bullets": [
+          "「通知」にサインインや取り込み完了などが届きます。",
+          "未読件数はメニューにバッジ表示されます。",
+          "「すべて既読」で一括既読にできます。"
+        ]
+      }
+    ]
+  }
+}

@@ -10,9 +10,11 @@ import {
   canViewFinanceDetail,
   canViewRevenueOnly,
 } from '../lib/permissions'
+import { ja } from '../locales'
 import type { CaseRecord } from '../types'
 
 export function CasesPage() {
+  const j = ja.cases
   const { user } = useAuth()
   const { data, upsertCase, removeCase } = useAppData()
   const role = user!.role
@@ -83,18 +85,18 @@ export function CasesPage() {
     <div className="page">
       <header className="page-header row">
         <div>
-          <h1>Cases</h1>
-          <p className="page-desc">Revenue and cost roll up to the dashboard.</p>
+          <h1>{j.title}</h1>
+          <p className="page-desc">{j.desc}</p>
         </div>
         <div className="toolbar">
           {canCsvOut ? (
             <button type="button" className="btn secondary" onClick={exportCsv}>
-              Export CSV
+              {ja.common.exportCsv}
             </button>
           ) : null}
           {canCsvIn ? (
             <label className="btn secondary file-btn">
-              Import CSV
+              {ja.common.importCsv}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -109,7 +111,7 @@ export function CasesPage() {
           ) : null}
           {canEdit ? (
             <button type="button" className="btn primary" onClick={startNew}>
-              New case
+              {j.newCase}
             </button>
           ) : null}
         </div>
@@ -119,17 +121,17 @@ export function CasesPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Customer</th>
-              <th>Status</th>
-              {showCost || showRevOnly ? <th>Revenue</th> : null}
+              <th>{j.colTitle}</th>
+              <th>{j.colCustomer}</th>
+              <th>{j.colStatus}</th>
+              {showCost || showRevOnly ? <th>{j.colRevenue}</th> : null}
               {showCost ? (
                 <>
-                  <th>Cost</th>
-                  <th>Profit</th>
+                  <th>{j.colCost}</th>
+                  <th>{j.colProfit}</th>
                 </>
               ) : null}
-              <th>Period</th>
+              <th>{j.colPeriod}</th>
               <th></th>
             </tr>
           </thead>
@@ -156,14 +158,14 @@ export function CasesPage() {
                     {canEdit ? (
                       <>
                         <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
-                          Edit
+                          {ja.common.edit}
                         </button>
                         <button type="button" className="link-btn danger" onClick={() => removeCase(c.id)}>
-                          Delete
+                          {ja.common.delete}
                         </button>
                       </>
                     ) : (
-                      <span className="muted">View only</span>
+                      <span className="muted">{ja.common.viewOnly}</span>
                     )}
                   </td>
                 </tr>
@@ -176,14 +178,14 @@ export function CasesPage() {
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>
           <div className="modal card">
-            <h2>{data.cases.some((c) => c.id === draft.id) ? 'Edit case' : 'New case'}</h2>
+            <h2>{data.cases.some((c) => c.id === draft.id) ? j.modalEdit : j.modalNew}</h2>
             <div className="form-grid">
               <label className="field">
-                <span>Title</span>
+                <span>{j.fieldTitle}</span>
                 <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
               </label>
               <label className="field">
-                <span>Customer</span>
+                <span>{j.fieldCustomer}</span>
                 <select
                   value={draft.customerId}
                   onChange={(e) => setDraft({ ...draft, customerId: e.target.value })}
@@ -196,19 +198,19 @@ export function CasesPage() {
                 </select>
               </label>
               <label className="field">
-                <span>Status</span>
+                <span>{j.fieldStatus}</span>
                 <select
                   value={draft.status}
                   onChange={(e) => setDraft({ ...draft, status: e.target.value as CaseRecord['status'] })}
                 >
-                  <option value="draft">Draft</option>
-                  <option value="active">Active</option>
-                  <option value="closed">Closed</option>
+                  <option value="draft">{j.statusDraft}</option>
+                  <option value="active">{j.statusActive}</option>
+                  <option value="closed">{j.statusClosed}</option>
                 </select>
               </label>
               {showCost || showRevOnly ? (
                 <label className="field">
-                  <span>Revenue (JPY)</span>
+                  <span>{j.fieldRevenue}</span>
                   <input
                     type="number"
                     min={0}
@@ -219,7 +221,7 @@ export function CasesPage() {
               ) : null}
               {showCost ? (
                 <label className="field">
-                  <span>Cost (JPY)</span>
+                  <span>{j.fieldCost}</span>
                   <input
                     type="number"
                     min={0}
@@ -229,7 +231,7 @@ export function CasesPage() {
                 </label>
               ) : null}
               <label className="field">
-                <span>Period (YYYY-MM)</span>
+                <span>{j.fieldPeriod}</span>
                 <input
                   type="month"
                   value={draft.period.length >= 7 ? draft.period.slice(0, 7) : draft.period}
@@ -239,10 +241,10 @@ export function CasesPage() {
             </div>
             <div className="modal-actions">
               <button type="button" className="btn ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {ja.common.cancel}
               </button>
               <button type="button" className="btn primary" onClick={saveDraft}>
-                Save
+                {ja.common.save}
               </button>
             </div>
           </div>
@@ -253,10 +255,11 @@ export function CasesPage() {
 }
 
 function statusLabel(s: CaseRecord['status']) {
+  const j = ja.cases
   const map: Record<CaseRecord['status'], string> = {
-    draft: 'Draft',
-    active: 'Active',
-    closed: 'Closed',
+    draft: j.statusDraft,
+    active: j.statusActive,
+    closed: j.statusClosed,
   }
   return map[s]
 }

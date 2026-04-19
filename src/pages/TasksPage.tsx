@@ -3,16 +3,18 @@ import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
 import { loadUsers } from '../storage/appStorage'
 import { canManageAllTasks } from '../lib/permissions'
+import { ja } from '../locales'
 import type { TaskRecord } from '../types'
 
 export function TasksPage() {
+  const j = ja.tasks
   const { user } = useAuth()
   const { data, upsertTask, removeTask } = useAppData()
   const role = user!.role
   const allTasks = canManageAllTasks(role)
 
   const users = useMemo(() => loadUsers(), [])
-  const userName = (id: string | null) => users.find((u) => u.id === id)?.name ?? '-'
+  const userName = (id: string | null) => users.find((u) => u.id === id)?.name ?? ja.common.dash
 
   const [draft, setDraft] = useState<TaskRecord | null>(null)
 
@@ -49,14 +51,12 @@ export function TasksPage() {
     <div className="page">
       <header className="page-header row">
         <div>
-          <h1>Tasks</h1>
-          <p className="page-desc">
-            {allTasks ? 'Manage tasks for everyone.' : 'Shows tasks assigned to you or unassigned.'}
-          </p>
+          <h1>{j.title}</h1>
+          <p className="page-desc">{allTasks ? j.descAll : j.descLimited}</p>
         </div>
         <div className="toolbar">
           <button type="button" className="btn primary" onClick={startNew}>
-            New task
+            {j.newTask}
           </button>
         </div>
       </header>
@@ -65,21 +65,19 @@ export function TasksPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Title</th>
-              <th>Case</th>
-              <th>Status</th>
-              <th>Due</th>
-              <th>Assignee</th>
+              <th>{j.colTitle}</th>
+              <th>{j.colCase}</th>
+              <th>{j.colStatus}</th>
+              <th>{j.colDue}</th>
+              <th>{j.colAssignee}</th>
               <th></th>
             </tr>
           </thead>
           <tbody>
             {visibleTasks.map((t) => {
-              const caseTitle = data.cases.find((c) => c.id === t.caseId)?.title ?? '-'
+              const caseTitle = data.cases.find((c) => c.id === t.caseId)?.title ?? ja.common.dash
               const canMutate =
-                allTasks ||
-                t.assigneeUserId === null ||
-                t.assigneeUserId === user!.id
+                allTasks || t.assigneeUserId === null || t.assigneeUserId === user!.id
               return (
                 <tr key={t.id}>
                   <td>{t.title}</td>
@@ -87,7 +85,9 @@ export function TasksPage() {
                   <td>
                     <span className={`pill task-${t.status}`}>{taskStatusLabel(t.status)}</span>
                   </td>
-                  <td>{t.dueDate ? new Date(t.dueDate).toLocaleDateString() : '-'}</td>
+                  <td>
+                    {t.dueDate ? new Date(t.dueDate).toLocaleDateString('ja-JP') : ja.common.dash}
+                  </td>
                   <td>{userName(t.assigneeUserId)}</td>
                   <td className="actions">
                     <button
@@ -96,7 +96,7 @@ export function TasksPage() {
                       onClick={() => startEdit(t)}
                       disabled={!canMutate}
                     >
-                      Edit
+                      {ja.common.edit}
                     </button>
                     <button
                       type="button"
@@ -104,7 +104,7 @@ export function TasksPage() {
                       onClick={() => removeTask(t.id)}
                       disabled={!canMutate}
                     >
-                      Delete
+                      {ja.common.delete}
                     </button>
                   </td>
                 </tr>
@@ -117,14 +117,14 @@ export function TasksPage() {
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>
           <div className="modal card">
-            <h2>{data.tasks.some((t) => t.id === draft.id) ? 'Edit task' : 'New task'}</h2>
+            <h2>{data.tasks.some((t) => t.id === draft.id) ? j.modalEdit : j.modalNew}</h2>
             <div className="form-grid">
               <label className="field">
-                <span>Title</span>
+                <span>{j.fieldTitle}</span>
                 <input value={draft.title} onChange={(e) => setDraft({ ...draft, title: e.target.value })} />
               </label>
               <label className="field">
-                <span>Case (optional)</span>
+                <span>{j.fieldCaseOptional}</span>
                 <select
                   value={draft.caseId ?? ''}
                   onChange={(e) =>
@@ -134,7 +134,7 @@ export function TasksPage() {
                     })
                   }
                 >
-                  <option value="">None</option>
+                  <option value="">{ja.common.none}</option>
                   {data.cases.map((c) => (
                     <option key={c.id} value={c.id}>
                       {c.title}
@@ -143,20 +143,20 @@ export function TasksPage() {
                 </select>
               </label>
               <label className="field">
-                <span>Status</span>
+                <span>{j.fieldStatus}</span>
                 <select
                   value={draft.status}
                   onChange={(e) =>
                     setDraft({ ...draft, status: e.target.value as TaskRecord['status'] })
                   }
                 >
-                  <option value="todo">Todo</option>
-                  <option value="doing">Doing</option>
-                  <option value="done">Done</option>
+                  <option value="todo">{j.statusTodo}</option>
+                  <option value="doing">{j.statusDoing}</option>
+                  <option value="done">{j.statusDone}</option>
                 </select>
               </label>
               <label className="field">
-                <span>Due date</span>
+                <span>{j.fieldDue}</span>
                 <input
                   type="date"
                   value={draft.dueDate ? draft.dueDate.slice(0, 10) : ''}
@@ -169,7 +169,7 @@ export function TasksPage() {
                 />
               </label>
               <label className="field">
-                <span>Assignee</span>
+                <span>{j.fieldAssignee}</span>
                 <select
                   value={draft.assigneeUserId ?? ''}
                   onChange={(e) =>
@@ -180,7 +180,7 @@ export function TasksPage() {
                   }
                   disabled={!allTasks}
                 >
-                  <option value="">Unassigned</option>
+                  <option value="">{ja.common.unassigned}</option>
                   {users.map((u) => (
                     <option key={u.id} value={u.id}>
                       {u.name}
@@ -189,15 +189,13 @@ export function TasksPage() {
                 </select>
               </label>
             </div>
-            {!allTasks ? (
-              <p className="hint">Only managers can change assignee. You can edit your own tasks.</p>
-            ) : null}
+            {!allTasks ? <p className="hint">{j.hintAssignee}</p> : null}
             <div className="modal-actions">
               <button type="button" className="btn ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {ja.common.cancel}
               </button>
               <button type="button" className="btn primary" onClick={saveDraft}>
-                Save
+                {ja.common.save}
               </button>
             </div>
           </div>
@@ -208,10 +206,11 @@ export function TasksPage() {
 }
 
 function taskStatusLabel(s: TaskRecord['status']) {
+  const j = ja.tasks
   const map: Record<TaskRecord['status'], string> = {
-    todo: 'Todo',
-    doing: 'Doing',
-    done: 'Done',
+    todo: j.statusTodo,
+    doing: j.statusDoing,
+    done: j.statusDone,
   }
   return map[s]
 }

@@ -2,15 +2,25 @@ import { NavLink, Outlet } from 'react-router-dom'
 import type { Role } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
+import { ja } from '../locales'
 import { menuForRole, type MenuKey } from '../lib/permissions'
 
-const labels: Record<MenuKey, { path: string; label: string }> = {
-  dashboard: { path: '/', label: 'Dashboard' },
-  cases: { path: '/cases', label: 'Cases' },
-  tasks: { path: '/tasks', label: 'Tasks' },
-  customers: { path: '/customers', label: 'Customers' },
-  data: { path: '/data', label: 'Data' },
-  notifications: { path: '/notifications', label: 'Alerts' },
+const paths: Record<MenuKey, string> = {
+  dashboard: '/',
+  cases: '/cases',
+  tasks: '/tasks',
+  customers: '/customers',
+  data: '/data',
+  notifications: '/notifications',
+}
+
+const labels: Record<MenuKey, string> = {
+  dashboard: ja.nav.dashboard,
+  cases: ja.nav.cases,
+  tasks: ja.nav.tasks,
+  customers: ja.nav.customers,
+  data: ja.nav.data,
+  notifications: ja.nav.notifications,
 }
 
 function navClass({ isActive }: { isActive: boolean }) {
@@ -31,14 +41,14 @@ export function AppLayout() {
         </div>
         <nav className="sidebar-nav">
           {allowed.map((key) => {
-            const item = labels[key]
+            const label = labels[key]
             const badge =
               key === 'notifications' && unreadCount > 0 ? (
                 <span className="nav-badge">{unreadCount}</span>
               ) : null
             return (
-              <NavLink key={key} to={item.path} className={navClass} end={key === 'dashboard'}>
-                {item.label}
+              <NavLink key={key} to={paths[key]} className={navClass} end={key === 'dashboard'}>
+                {label}
                 {badge}
               </NavLink>
             )
@@ -50,7 +60,7 @@ export function AppLayout() {
             <div className="user-role">{roleLabel(user?.role)}</div>
           </div>
           <button type="button" className="btn ghost" onClick={() => logout()}>
-            Sign out
+            {ja.common.signOut}
           </button>
         </div>
       </aside>
@@ -64,10 +74,10 @@ export function AppLayout() {
 function roleLabel(role: Role | undefined) {
   if (!role) return ''
   const map: Record<Role, string> = {
-    admin: 'Admin',
-    manager: 'Manager',
-    sales: 'Sales',
-    staff: 'Staff',
+    admin: ja.roles.admin,
+    manager: ja.roles.manager,
+    sales: ja.roles.sales,
+    staff: ja.roles.staff,
   }
   return map[role]
 }

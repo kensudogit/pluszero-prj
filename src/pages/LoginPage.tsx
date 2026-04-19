@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
 import { UsageGuide } from '../components/UsageGuide'
+import { interpolate, ja } from '../locales'
 
 export function LoginPage() {
   const { user, login } = useAuth()
@@ -24,64 +25,64 @@ export function LoginPage() {
     setError('')
     const ok = login(email, password)
     if (!ok) {
-      setError('Invalid email or password.')
+      setError(ja.login.errorInvalid)
       return
     }
-    push('Signed in', `Welcome - ${email}`)
+    push(ja.login.notifySignedInTitle, interpolate(ja.login.notifySignedInBody, { email }))
     navigate(from, { replace: true })
   }
 
   return (
     <div className="login-wrap">
       <div className="login-column">
-      <div className="login-card">
-        <h1 className="login-title">PlusZero CRM</h1>
-        <p className="login-lead">Sign in with a demo account.</p>
-        <form className="form-stack" onSubmit={onSubmit}>
-          <label className="field">
-            <span>Email</span>
-            <input
-              type="email"
-              autoComplete="username"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
-          <label className="field">
-            <span>Password</span>
-            <input
-              type="password"
-              autoComplete="current-password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-            />
-          </label>
-          {error ? <p className="form-error">{error}</p> : null}
-          <button type="submit" className="btn primary wide">
-            Sign in
-          </button>
-        </form>
-        <details className="demo-hint">
-          <summary>Demo users</summary>
-          <ul>
-            <li>
-              <code>admin@demo.com</code> / <code>demo123</code> (admin)
-            </li>
-            <li>
-              <code>manager@demo.com</code> / <code>demo123</code>
-            </li>
-            <li>
-              <code>sales@demo.com</code> / <code>demo123</code>
-            </li>
-            <li>
-              <code>staff@demo.com</code> / <code>demo123</code>
-            </li>
-          </ul>
-        </details>
-      </div>
-      <UsageGuide />
+        <div className="login-card">
+          <h1 className="login-title">{ja.login.title}</h1>
+          <p className="login-lead">{ja.login.lead}</p>
+          <form className="form-stack" onSubmit={onSubmit}>
+            <label className="field">
+              <span>{ja.login.email}</span>
+              <input
+                type="email"
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </label>
+            <label className="field">
+              <span>{ja.login.password}</span>
+              <input
+                type="password"
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+              />
+            </label>
+            {error ? <p className="form-error">{error}</p> : null}
+            <button type="submit" className="btn primary wide">
+              {ja.login.submit}
+            </button>
+          </form>
+          <details className="demo-hint">
+            <summary>{ja.login.demoSummary}</summary>
+            <ul>
+              <li>
+                <code>admin@demo.com</code> / <code>demo123</code> ({ja.roles.admin})
+              </li>
+              <li>
+                <code>manager@demo.com</code> / <code>demo123</code>
+              </li>
+              <li>
+                <code>sales@demo.com</code> / <code>demo123</code>
+              </li>
+              <li>
+                <code>staff@demo.com</code> / <code>demo123</code>
+              </li>
+            </ul>
+          </details>
+        </div>
+        <UsageGuide />
       </div>
     </div>
   )

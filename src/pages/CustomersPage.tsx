@@ -3,9 +3,11 @@ import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
 import { canEditCustomers, canExportCsv, canImportCsv } from '../lib/permissions'
+import { ja } from '../locales'
 import type { CustomerRecord } from '../types'
 
 export function CustomersPage() {
+  const j = ja.customers
   const { user } = useAuth()
   const { data, upsertCustomer, removeCustomer } = useAppData()
   const role = user!.role
@@ -63,18 +65,18 @@ export function CustomersPage() {
     <div className="page">
       <header className="page-header row">
         <div>
-          <h1>Customers</h1>
-          <p className="page-desc">Master data used by cases and CSV exchange.</p>
+          <h1>{j.title}</h1>
+          <p className="page-desc">{j.desc}</p>
         </div>
         <div className="toolbar">
           {canOut ? (
             <button type="button" className="btn secondary" onClick={exportCsv}>
-              Export CSV
+              {ja.common.exportCsv}
             </button>
           ) : null}
           {canIn ? (
             <label className="btn secondary file-btn">
-              Import CSV
+              {ja.common.importCsv}
               <input
                 type="file"
                 accept=".csv,text/csv"
@@ -89,7 +91,7 @@ export function CustomersPage() {
           ) : null}
           {canEdit ? (
             <button type="button" className="btn primary" onClick={startNew}>
-              New customer
+              {j.newCustomer}
             </button>
           ) : null}
         </div>
@@ -99,11 +101,11 @@ export function CustomersPage() {
         <table className="data-table">
           <thead>
             <tr>
-              <th>Company</th>
-              <th>Contact</th>
-              <th>Email</th>
-              <th>Phone</th>
-              <th>Note</th>
+              <th>{j.colCompany}</th>
+              <th>{j.colContact}</th>
+              <th>{ja.common.email}</th>
+              <th>{ja.common.phone}</th>
+              <th>{ja.common.note}</th>
               <th></th>
             </tr>
           </thead>
@@ -119,14 +121,14 @@ export function CustomersPage() {
                   {canEdit ? (
                     <>
                       <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
-                        Edit
+                        {ja.common.edit}
                       </button>
                       <button type="button" className="link-btn danger" onClick={() => removeCustomer(c.id)}>
-                        Delete
+                        {ja.common.delete}
                       </button>
                     </>
                   ) : (
-                    <span className="muted">View only</span>
+                    <span className="muted">{ja.common.viewOnly}</span>
                   )}
                 </td>
               </tr>
@@ -138,18 +140,18 @@ export function CustomersPage() {
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>
           <div className="modal card">
-            <h2>{data.customers.some((c) => c.id === draft.id) ? 'Edit customer' : 'New customer'}</h2>
+            <h2>{data.customers.some((c) => c.id === draft.id) ? j.modalEdit : j.modalNew}</h2>
             <div className="form-grid">
               <label className="field">
-                <span>Company</span>
+                <span>{j.fieldCompany}</span>
                 <input value={draft.company} onChange={(e) => setDraft({ ...draft, company: e.target.value })} />
               </label>
               <label className="field">
-                <span>Contact name</span>
+                <span>{j.fieldContact}</span>
                 <input value={draft.name} onChange={(e) => setDraft({ ...draft, name: e.target.value })} />
               </label>
               <label className="field">
-                <span>Email</span>
+                <span>{j.fieldEmail}</span>
                 <input
                   type="email"
                   value={draft.email}
@@ -157,11 +159,11 @@ export function CustomersPage() {
                 />
               </label>
               <label className="field">
-                <span>Phone</span>
+                <span>{j.fieldPhone}</span>
                 <input value={draft.phone} onChange={(e) => setDraft({ ...draft, phone: e.target.value })} />
               </label>
               <label className="field wide">
-                <span>Note</span>
+                <span>{j.fieldNote}</span>
                 <textarea
                   rows={3}
                   value={draft.note}
@@ -171,10 +173,10 @@ export function CustomersPage() {
             </div>
             <div className="modal-actions">
               <button type="button" className="btn ghost" onClick={() => setDraft(null)}>
-                Cancel
+                {ja.common.cancel}
               </button>
               <button type="button" className="btn primary" onClick={saveDraft}>
-                Save
+                {ja.common.save}
               </button>
             </div>
           </div>
