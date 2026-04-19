@@ -75,8 +75,10 @@ export function LoginPage() {
     <div className="login-wrap">
       <div className="login-column">
         <div className="login-card">
-          <img src="/pc.png" alt="" className="login-logo" width={64} height={64} decoding="async" />
-          <h1 className="login-title">{j.title}</h1>
+          <div className="login-brand">
+            <img src="/pc.png" alt="" className="login-logo" width={64} height={64} decoding="async" />
+            <h1 className="login-title">{j.title}</h1>
+          </div>
 
           <div className="login-tabs" role="tablist">
             <button
