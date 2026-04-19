@@ -2,6 +2,7 @@ import type { Role } from '../types'
 
 export type MenuKey =
   | 'dashboard'
+  | 'reports'
   | 'portal'
   | 'cases'
   | 'tasks'
@@ -10,10 +11,10 @@ export type MenuKey =
   | 'notifications'
 
 const roleMenus: Record<Role, MenuKey[]> = {
-  admin: ['dashboard', 'portal', 'cases', 'tasks', 'customers', 'data', 'notifications'],
-  manager: ['dashboard', 'portal', 'cases', 'tasks', 'customers', 'data', 'notifications'],
-  sales: ['dashboard', 'portal', 'cases', 'tasks', 'customers', 'notifications'],
-  staff: ['dashboard', 'portal', 'cases', 'tasks', 'notifications'],
+  admin: ['dashboard', 'reports', 'portal', 'cases', 'tasks', 'customers', 'data', 'notifications'],
+  manager: ['dashboard', 'reports', 'portal', 'cases', 'tasks', 'customers', 'data', 'notifications'],
+  sales: ['dashboard', 'reports', 'portal', 'cases', 'tasks', 'customers', 'notifications'],
+  staff: ['dashboard', 'reports', 'portal', 'cases', 'tasks', 'notifications'],
 }
 
 export function menuForRole(role: Role): MenuKey[] {

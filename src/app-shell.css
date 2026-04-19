@@ -1341,3 +1341,130 @@ body {
     grid-template-columns: 1fr;
   }
 }
+
+/* ---- reports & analysis ---- */
+.reports-print-hint {
+  margin: 0;
+  font-size: 0.78rem;
+  color: var(--shell-muted);
+  max-width: 14rem;
+}
+
+.reports-section-title {
+  margin: 0 0 1rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.reports-filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1rem;
+  align-items: end;
+}
+
+.reports-filter-actions {
+  display: flex;
+  align-items: flex-end;
+}
+
+.reports-kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.reports-kpi-card {
+  background: var(--shell-panel);
+  border: 1px solid var(--shell-border);
+  border-radius: 12px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.reports-kpi-muted .reports-kpi-value {
+  color: var(--shell-muted);
+  font-size: 0.9rem;
+}
+
+.reports-kpi-label {
+  font-size: 0.78rem;
+  color: var(--shell-muted);
+}
+
+.reports-kpi-value {
+  font-size: 1.15rem;
+  font-weight: 700;
+}
+
+.reports-chart-block {
+  margin-bottom: 1.25rem;
+}
+
+.reports-chart-wrap {
+  width: 100%;
+  min-height: 260px;
+}
+
+.reports-chart-wrap--pie {
+  max-width: 420px;
+  margin: 0 auto;
+}
+
+.reports-two-col {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.25rem;
+}
+
+.reports-muted {
+  margin: 0;
+  font-size: 0.88rem;
+  color: var(--shell-muted);
+}
+
+.reports-export .toolbar {
+  margin-top: 0.75rem;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+
+  .app-shell .sidebar,
+  .app-shell .main-toolbar {
+    display: none !important;
+  }
+
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .main-area {
+    padding: 0.5rem !important;
+  }
+
+  body {
+    background: #fff;
+    color: #111;
+  }
+
+  .card {
+    break-inside: avoid;
+    border-color: #ddd;
+  }
+
+  .reports-kpi-card {
+    border-color: #ddd;
+    background: #fafafa;
+  }
+
+  .recharts-responsive-container svg {
+    max-height: 280px;
+  }
+}

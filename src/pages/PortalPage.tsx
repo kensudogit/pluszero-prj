@@ -54,7 +54,7 @@ export function PortalPage() {
     setResult('')
     try {
       const out = await postAiJson<TextResult>(path, body)
-      if (!out.ok) {
+      if (out.ok === false) {
         setErr(out.message)
         return
       }

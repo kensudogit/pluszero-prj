@@ -58,7 +58,7 @@ export function LoginPage() {
       password: regPassword,
       role: regRole,
     })
-    if (!res.ok) {
+    if (res.ok === false) {
       if (res.code === 'duplicate') setError(j.registerErrorDuplicate)
       else if (res.code === 'weak') setError(j.registerErrorWeakPassword)
       else setError(j.registerErrorName)

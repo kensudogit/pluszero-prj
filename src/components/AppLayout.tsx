@@ -10,6 +10,7 @@ const LOGO_SRC = '/pc.png'
 
 const paths: Record<MenuKey, string> = {
   dashboard: '/',
+  reports: '/reports',
   portal: '/portal',
   cases: '/cases',
   tasks: '/tasks',
@@ -20,6 +21,7 @@ const paths: Record<MenuKey, string> = {
 
 const labels: Record<MenuKey, string> = {
   dashboard: ja.nav.dashboard,
+  reports: ja.nav.reports,
   portal: ja.nav.portal,
   cases: ja.nav.cases,
   tasks: ja.nav.tasks,
