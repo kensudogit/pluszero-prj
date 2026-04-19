@@ -73,6 +73,9 @@ export function LoginPage() {
 
   return (
     <div className="login-wrap">
+      <div className="login-page-top">
+        <UsageGuide placement="top" />
+      </div>
       <div className="login-column">
         <div className="login-card">
           <div className="login-brand">
@@ -216,7 +219,6 @@ export function LoginPage() {
             </>
           )}
         </div>
-        <UsageGuide />
       </div>
     </div>
   )

@@ -73,12 +73,19 @@ function SectionIcon({ name }: { name: string }) {
   }
 }
 
-export function UsageGuide() {
-  const [open, setOpen] = useState(true)
+type Placement = 'default' | 'top'
+
+export function UsageGuide({ placement = 'default' }: { placement?: Placement }) {
+  const [open, setOpen] = useState(placement === 'top' ? false : true)
   const ug = ja.usageGuide
 
+  const rootClass =
+    placement === 'top'
+      ? `usage-guide usage-guide--top ${open ? 'usage-guide--top-open' : ''}`
+      : 'usage-guide'
+
   return (
-    <div className="usage-guide">
+    <div className={rootClass}>
       <button
         type="button"
         className="usage-guide-header"
@@ -94,15 +101,23 @@ export function UsageGuide() {
           </svg>
           <span className="usage-guide-title">{ug.title}</span>
         </span>
-        <svg
-          className={`usage-guide-chevron ${open ? 'open' : ''}`}
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          aria-hidden
-        >
-          <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
-        </svg>
+        {placement === 'top' ? (
+          <span className="usage-guide-chevron-wrap" aria-hidden>
+            <svg className={`usage-guide-chevron ${open ? 'open' : ''}`} width="18" height="18" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+            </svg>
+          </span>
+        ) : (
+          <svg
+            className={`usage-guide-chevron ${open ? 'open' : ''}`}
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            aria-hidden
+          >
+            <path fill="currentColor" d="M7 10l5 5 5-5H7z" />
+          </svg>
+        )}
       </button>
 
       {open ? (
