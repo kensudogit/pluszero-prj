@@ -152,6 +152,95 @@ body {
   font-size: 0.95rem;
 }
 
+.portal-page .portal-api-line {
+  margin: 0.65rem 0 0;
+  font-size: 0.82rem;
+  color: var(--shell-muted);
+}
+
+.portal-page .portal-api-line code {
+  font-size: 0.82rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.portal-health.ok {
+  color: var(--shell-accent);
+}
+
+.portal-health.warn {
+  color: var(--shell-danger);
+}
+
+.portal-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.portal-tab {
+  border: 1px solid var(--shell-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--shell-muted);
+  padding: 0.4rem 0.75rem;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 0.88rem;
+}
+
+.portal-tab.active {
+  border-color: rgba(108, 156, 255, 0.45);
+  background: var(--shell-accent-soft);
+  color: var(--shell-accent);
+  font-weight: 600;
+}
+
+.portal-panel .btn.primary {
+  margin-top: 0.35rem;
+}
+
+.portal-cases-intro {
+  margin: 0 0 0.75rem;
+  color: var(--shell-muted);
+  font-size: 0.92rem;
+}
+
+.portal-subh {
+  margin: 1rem 0 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.portal-pre {
+  margin: 0;
+  padding: 1rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--shell-border);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: min(55vh, 520px);
+  overflow: auto;
+}
+
+.portal-loading {
+  margin: 0 0 0.5rem;
+  color: var(--shell-muted);
+}
+
+.portal-case-list {
+  margin: 0.35rem 0 0;
+  padding-left: 1.2rem;
+}
+
+.portal-case-list a {
+  color: var(--shell-accent);
+}
+
 .toolbar {
   display: flex;
   flex-wrap: wrap;

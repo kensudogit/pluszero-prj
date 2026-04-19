@@ -12,6 +12,7 @@ import { TasksPage } from './pages/TasksPage'
 import { CustomersPage } from './pages/CustomersPage'
 import { DataExchangePage } from './pages/DataExchangePage'
 import { NotificationsPage } from './pages/NotificationsPage'
+import { PortalPage } from './pages/PortalPage'
 import './app-shell.css'
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
                 }
               >
                 <Route index element={<DashboardPage />} />
+                <Route path="portal" element={<PortalPage />} />
                 <Route path="cases" element={<CasesPage />} />
                 <Route path="tasks" element={<TasksPage />} />
                 <Route
