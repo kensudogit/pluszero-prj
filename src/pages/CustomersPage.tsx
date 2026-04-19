@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { PaginationBar } from '../components/PaginationBar'
 import { uid, useAppData } from '../contexts/DataContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
+import { clampPage, PAGE_SIZE_OPTIONS, type PageSize } from '../lib/pagination'
 import { canEditCustomers, canExportCsv, canImportCsv } from '../lib/permissions'
 import { ja } from '../locales'
 import type { CustomerRecord } from '../types'
@@ -23,16 +25,12 @@ export function CustomersPage() {
 
   const [draft, setDraft] = useState<CustomerRecord | null>(null)
   const [filterQ, setFilterQ] = useState('')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<PageSize>(PAGE_SIZE_OPTIONS[1])
 
   useEffect(() => {
-    const id = location.hash.replace(/^#/, '')
-    if (!id) return
-    const el = document.getElementById(`customer-row-${id}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    el?.classList.add('row-highlight')
-    const t = window.setTimeout(() => el?.classList.remove('row-highlight'), 2200)
-    return () => window.clearTimeout(t)
-  }, [location.hash])
+    setPage(1)
+  }, [filterQ])
 
   const filteredCustomers = useMemo(() => {
     const q = norm(filterQ)
@@ -41,6 +39,42 @@ export function CustomersPage() {
       norm([c.company, c.name, c.email, c.phone, c.note].join(' ')).includes(q)
     )
   }, [data.customers, filterQ])
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(filteredCustomers.length / pageSize) || 1)
+    setPage((p) => Math.min(p, tp))
+  }, [filteredCustomers.length, pageSize])
+
+  useEffect(() => {
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    const idx = filteredCustomers.findIndex((c) => c.id === raw)
+    if (idx >= 0) setPage(Math.floor(idx / pageSize) + 1)
+  }, [location.hash, filteredCustomers, pageSize])
+
+  const safePage = clampPage(page, filteredCustomers.length, pageSize)
+
+  const pagedCustomers = useMemo(() => {
+    const start = (safePage - 1) * pageSize
+    return filteredCustomers.slice(start, start + pageSize)
+  }, [filteredCustomers, safePage, pageSize])
+
+  useEffect(() => {
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    let tid = 0
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(`customer-row-${raw}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      el.classList.add('row-highlight')
+      tid = window.setTimeout(() => el.classList.remove('row-highlight'), 2200)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      if (tid) window.clearTimeout(tid)
+    }
+  }, [location.hash, safePage])
 
   function startNew() {
     setDraft({
@@ -154,7 +188,7 @@ export function CustomersPage() {
                 </td>
               </tr>
             ) : (
-              filteredCustomers.map((c) => (
+              pagedCustomers.map((c) => (
                 <tr key={c.id} id={`customer-row-${c.id}`}>
                   <td>{c.company}</td>
                   <td>{c.name}</td>
@@ -181,6 +215,19 @@ export function CustomersPage() {
           </tbody>
         </table>
       </div>
+
+      {filteredCustomers.length > 0 ? (
+        <PaginationBar
+          total={filteredCustomers.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(n) => {
+            setPageSize(n as PageSize)
+            setPage(1)
+          }}
+        />
+      ) : null}
 
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>

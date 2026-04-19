@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { PaginationBar } from '../components/PaginationBar'
 import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
+import { clampPage, PAGE_SIZE_OPTIONS, type PageSize } from '../lib/pagination'
 import { canManageAllTasks } from '../lib/permissions'
 import { ja } from '../locales'
 import type { TaskRecord } from '../types'
@@ -26,16 +28,12 @@ export function TasksPage() {
   const [filterAssignee, setFilterAssignee] = useState<string>('all')
   const [filterCase, setFilterCase] = useState<string>('all')
   const [viewMode, setViewMode] = useState<'list' | 'board'>('list')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<PageSize>(PAGE_SIZE_OPTIONS[1])
 
   useEffect(() => {
-    const id = location.hash.replace(/^#/, '')
-    if (!id) return
-    const el = document.getElementById(`task-row-${id}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    el?.classList.add('row-highlight')
-    const t = window.setTimeout(() => el?.classList.remove('row-highlight'), 2200)
-    return () => window.clearTimeout(t)
-  }, [location.hash])
+    setPage(1)
+  }, [filterQ, filterStatus, filterAssignee, filterCase])
 
   function startNew() {
     setDraft({
@@ -91,6 +89,44 @@ export function TasksPage() {
     }
     return rows
   }, [data.cases, filterAssignee, filterCase, filterQ, filterStatus, users, visibleTasks])
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(filteredTasks.length / pageSize) || 1)
+    setPage((p) => Math.min(p, tp))
+  }, [filteredTasks.length, pageSize])
+
+  useEffect(() => {
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    const idx = filteredTasks.findIndex((t) => t.id === raw)
+    if (idx >= 0) setPage(Math.floor(idx / pageSize) + 1)
+  }, [location.hash, filteredTasks, pageSize])
+
+  const safePage = clampPage(page, filteredTasks.length, pageSize)
+
+  const pagedTasks = useMemo(() => {
+    if (viewMode !== 'list') return []
+    const start = (safePage - 1) * pageSize
+    return filteredTasks.slice(start, start + pageSize)
+  }, [filteredTasks, safePage, pageSize, viewMode])
+
+  useEffect(() => {
+    if (viewMode !== 'list') return
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    let tid = 0
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(`task-row-${raw}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      el.classList.add('row-highlight')
+      tid = window.setTimeout(() => el.classList.remove('row-highlight'), 2200)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      if (tid) window.clearTimeout(tid)
+    }
+  }, [location.hash, safePage, viewMode])
 
   return (
     <div className="page">
@@ -167,6 +203,8 @@ export function TasksPage() {
         </label>
       </div>
 
+      {viewMode === 'board' ? <p className="filter-hint muted">{j.boardFullList}</p> : null}
+
       {viewMode === 'list' ? (
         <div className="table-wrap card">
           <table className="data-table">
@@ -188,7 +226,7 @@ export function TasksPage() {
                   </td>
                 </tr>
               ) : (
-                filteredTasks.map((t) => {
+                pagedTasks.map((t) => {
                   const caseTitle = data.cases.find((c) => c.id === t.caseId)?.title ?? ja.common.dash
                   const canMutate =
                     allTasks || t.assigneeUserId === null || t.assigneeUserId === user!.id
@@ -228,7 +266,22 @@ export function TasksPage() {
             </tbody>
           </table>
         </div>
-      ) : (
+      ) : null}
+
+      {viewMode === 'list' && filteredTasks.length > 0 ? (
+        <PaginationBar
+          total={filteredTasks.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(n) => {
+            setPageSize(n as PageSize)
+            setPage(1)
+          }}
+        />
+      ) : null}
+
+      {viewMode === 'board' ? (
         <div className="task-board card">
           {(['todo', 'doing', 'done'] as const).map((st) => (
             <div key={st} className="task-board-column">
@@ -273,7 +326,7 @@ export function TasksPage() {
             </div>
           ))}
         </div>
-      )}
+      ) : null}
 
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>

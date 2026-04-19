@@ -34,6 +34,14 @@
     "unassigned": "未割当",
     "permissionDenied": "権限がありません。"
   },
+  "pagination": {
+    "perPage": "1ページあたり",
+    "prev": "前へ",
+    "next": "次へ",
+    "range": "{{from}}–{{to}} 件 / 全 {{total}} 件",
+    "pageStatus": "{{page}} / {{totalPages}} ページ",
+    "empty": "0 件"
+  },
   "quickSearch": {
     "openButton": "クイック検索",
     "placeholder": "案件・顧客・タスクを検索...",
@@ -153,6 +161,7 @@
     "filterCaseAll": "すべて",
     "viewList": "一覧",
     "viewBoard": "ボード",
+    "boardFullList": "ボード表示は、フィルタ後のタスクを状態別に全件表示します（ページ分割なし）。",
     "filterEmpty": "条件に一致するタスクがありません。"
   },
   "customers": {

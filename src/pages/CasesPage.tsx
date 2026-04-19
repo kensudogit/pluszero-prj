@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
+import { clampPage, PAGE_SIZE_OPTIONS, type PageSize } from '../lib/pagination'
 import { yen } from '../lib/format'
 import {
   canEditCases,
@@ -11,6 +12,7 @@ import {
   canViewFinanceDetail,
   canViewRevenueOnly,
 } from '../lib/permissions'
+import { PaginationBar } from '../components/PaginationBar'
 import { ja } from '../locales'
 import type { CaseRecord } from '../types'
 
@@ -40,16 +42,12 @@ export function CasesPage() {
   const [filterCustomer, setFilterCustomer] = useState<string>('all')
   const [sortKey, setSortKey] = useState<SortKey>('updatedAt')
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState<PageSize>(PAGE_SIZE_OPTIONS[1])
 
   useEffect(() => {
-    const id = location.hash.replace(/^#/, '')
-    if (!id) return
-    const el = document.getElementById(`case-row-${id}`)
-    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
-    el?.classList.add('row-highlight')
-    const t = window.setTimeout(() => el?.classList.remove('row-highlight'), 2200)
-    return () => window.clearTimeout(t)
-  }, [location.hash])
+    setPage(1)
+  }, [filterQ, filterStatus, filterCustomer])
 
   const filteredCases = useMemo(() => {
     let rows = data.cases
@@ -95,6 +93,42 @@ export function CasesPage() {
     })
     return rows
   }, [customersById, filteredCases, sortDir, sortKey])
+
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(sortedCases.length / pageSize) || 1)
+    setPage((p) => Math.min(p, tp))
+  }, [sortedCases.length, pageSize])
+
+  useEffect(() => {
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    const idx = sortedCases.findIndex((c) => c.id === raw)
+    if (idx >= 0) setPage(Math.floor(idx / pageSize) + 1)
+  }, [location.hash, sortedCases, pageSize])
+
+  const safePage = clampPage(page, sortedCases.length, pageSize)
+
+  const pagedCases = useMemo(() => {
+    const start = (safePage - 1) * pageSize
+    return sortedCases.slice(start, start + pageSize)
+  }, [sortedCases, safePage, pageSize])
+
+  useEffect(() => {
+    const raw = location.hash.replace(/^#/, '')
+    if (!raw) return
+    let tid = 0
+    const raf = requestAnimationFrame(() => {
+      const el = document.getElementById(`case-row-${raw}`)
+      if (!el) return
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+      el.classList.add('row-highlight')
+      tid = window.setTimeout(() => el.classList.remove('row-highlight'), 2200)
+    })
+    return () => {
+      cancelAnimationFrame(raf)
+      if (tid) window.clearTimeout(tid)
+    }
+  }, [location.hash, safePage])
 
   function toggleSort(key: SortKey) {
     if (sortKey !== key) {
@@ -302,7 +336,7 @@ export function CasesPage() {
                 </td>
               </tr>
             ) : (
-              sortedCases.map((c) => {
+              pagedCases.map((c) => {
                 const cust = customersById.get(c.customerId)
                 const profit = c.revenue - c.cost
                 return (
@@ -342,6 +376,19 @@ export function CasesPage() {
           </tbody>
         </table>
       </div>
+
+      {sortedCases.length > 0 ? (
+        <PaginationBar
+          total={sortedCases.length}
+          page={page}
+          pageSize={pageSize}
+          onPageChange={setPage}
+          onPageSizeChange={(n) => {
+            setPageSize(n as PageSize)
+            setPage(1)
+          }}
+        />
+      ) : null}
 
       {draft ? (
         <div className="modal-overlay" role="dialog" aria-modal>

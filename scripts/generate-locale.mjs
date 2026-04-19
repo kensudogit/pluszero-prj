@@ -44,6 +44,14 @@ const ja = {
     unassigned: '\u672a\u5272\u5f53',
     permissionDenied: '\u6a29\u9650\u304c\u3042\u308a\u307e\u305b\u3093\u3002',
   },
+  pagination: {
+    perPage: '1\u30da\u30fc\u30b8\u3042\u305f\u308a',
+    prev: '\u524d\u3078',
+    next: '\u6b21\u3078',
+    range: '{{from}}\u2013{{to}} \u4ef6 / \u5168 {{total}} \u4ef6',
+    pageStatus: '{{page}} / {{totalPages}} \u30da\u30fc\u30b8',
+    empty: '0 \u4ef6',
+  },
   quickSearch: {
     openButton: '\u30af\u30a4\u30c3\u30af\u691c\u7d22',
     placeholder: '\u6848\u4ef6\u30fb\u9867\u5ba2\u30fb\u30bf\u30b9\u30af\u3092\u691c\u7d22...',
@@ -173,6 +181,8 @@ const ja = {
     filterCaseAll: '\u3059\u3079\u3066',
     viewList: '\u4e00\u89a7',
     viewBoard: '\u30dc\u30fc\u30c9',
+    boardFullList:
+      '\u30dc\u30fc\u30c9\u8868\u793a\u306f\u3001\u30d5\u30a3\u30eb\u30bf\u5f8c\u306e\u30bf\u30b9\u30af\u3092\u72b6\u614b\u5225\u306b\u5168\u4ef6\u8868\u793a\u3057\u307e\u3059\uff08\u30da\u30fc\u30b8\u5206\u5272\u306a\u3057\uff09\u3002',
     filterEmpty:
       '\u6761\u4ef6\u306b\u4e00\u81f4\u3059\u308b\u30bf\u30b9\u30af\u304c\u3042\u308a\u307e\u305b\u3093\u3002',
   },
