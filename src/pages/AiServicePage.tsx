@@ -19,7 +19,7 @@ function dataUrlToBase64(dataUrl: string): string {
   return i >= 0 ? dataUrl.slice(i + 1) : dataUrl
 }
 
-/** Web Speech API (prefixed in some browsers) ù minimal typing for recognition only */
+/** Web Speech API (prefixed in some browsers) - minimal typing for recognition only */
 type BrowserSpeechRecognition = {
   lang: string
   continuous: boolean
