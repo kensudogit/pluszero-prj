@@ -51,17 +51,12 @@ body {
   margin-bottom: 1.25rem;
 }
 
-.brand-mark {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+.brand-logo {
   width: 36px;
   height: 36px;
+  object-fit: contain;
+  flex-shrink: 0;
   border-radius: 8px;
-  background: var(--shell-accent-soft);
-  color: var(--shell-accent);
-  font-weight: 700;
-  font-size: 0.85rem;
 }
 
 .brand-name {
@@ -435,6 +430,46 @@ body {
   border: 1px solid var(--shell-border);
   border-radius: 16px;
   padding: 1.75rem 1.5rem;
+}
+
+.login-tabs {
+  display: flex;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.login-tab {
+  flex: 1;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--shell-border);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--shell-muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.9rem;
+}
+
+.login-tab.active {
+  background: var(--shell-accent-soft);
+  border-color: rgba(108, 156, 255, 0.45);
+  color: var(--shell-accent);
+  font-weight: 600;
+}
+
+.login-subtitle {
+  margin: 0 0 0.75rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.login-logo {
+  display: block;
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 0.5rem;
+  object-fit: contain;
 }
 
 .login-title {

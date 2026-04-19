@@ -167,6 +167,10 @@ export function loadUsers(): User[] {
   }
 }
 
+export function saveUsers(users: User[]) {
+  localStorage.setItem(KEYS.users, JSON.stringify(users))
+}
+
 export function loadAppData(): AppData {
   try {
     const raw = localStorage.getItem(KEYS.data)

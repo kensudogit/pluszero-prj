@@ -43,7 +43,21 @@
     "errorInvalid": "メールアドレスまたはパスワードが正しくありません。",
     "demoSummary": "デモユーザー",
     "notifySignedInTitle": "ログインしました",
-    "notifySignedInBody": "ようこそ — {{email}}"
+    "notifySignedInBody": "ようこそ — {{email}}",
+    "toggleRegister": "新規登録",
+    "toggleLogin": "ログイン",
+    "registerTitle": "新規登録",
+    "registerLead": "ユーザー情報はブラウザのlocalStorageに保存されます（検証用デモ、パスワードは暗文のまま保存されます）。",
+    "displayName": "表示名",
+    "passwordConfirm": "パスワード（確認）",
+    "roleLabel": "権限ロール",
+    "registerSubmit": "登録する",
+    "registerSuccessNotifyTitle": "登録完了",
+    "registerSuccessNotifyBody": "{{name}} （{{email}}）を登録し、ログインしました。",
+    "registerErrorDuplicate": "このメールアドレスはすでに登録されています。",
+    "registerErrorPasswordMismatch": "パスワードと確認が一致しません。",
+    "registerErrorWeakPassword": "パスワードは8文字以上にしてください。",
+    "registerErrorName": "表示名を入力してください。"
   },
   "dashboard": {
     "title": "ダッシュボード",
@@ -171,6 +185,7 @@
         "title": "ログイン認証",
         "icon": "lock",
         "bullets": [
+          "「ログイン」と「新規登録」を画面上部のタブで切り替えられます。",
           "メールアドレスとパスワードを入力し、「ログイン」をクリックします。",
           "デモは「デモユーザー」を開いて `admin@demo.com` / `demo123` などをご利用ください。",
           "セッションはブラウザ内に保存されます（検証用デモです）。"
@@ -241,9 +256,21 @@
         "title": "通知機能",
         "icon": "bell",
         "bullets": [
-          "「通知」にサインインや取り込み完了などが届きます。",
+          "「通知」にサインインや登録完了、取り込み完了などが届きます。",
           "未読件数はメニューにバッジ表示されます。",
           "「すべて既読」で一括既読にできます。"
+        ]
+      },
+      {
+        "n": 9,
+        "title": "新規ユーザー登録",
+        "icon": "userPlus",
+        "bullets": [
+          "「新規登録」タブで表示名・メール・権限ロール（スタッフ、営業、マネージャーから選択）・パスワード（8文字以上）を入力し、「登録する」を押します。",
+          "登録が完わると自動的にログインします。同じメールアドレスは重複登録できません。",
+          "ユーザー情報はブラウザのlocalStorage（鍵名 `pz_users`）に保存されます。検証用のためパスワードは暗文のまま保存されます本番環境では使用しないでください。",
+          "管理者（admin）は自分で登録できません。管理者として利用する場合は、デモの `admin@demo.com` をご利用ください。",
+          "登録したユーザーは「タスク」の担当選択などに表示されます。"
         ]
       }
     ]

@@ -3,6 +3,8 @@ import type { Role } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
 import { ja } from '../locales'
+
+const LOGO_SRC = '/pc.png'
 import { menuForRole, type MenuKey } from '../lib/permissions'
 
 const paths: Record<MenuKey, string> = {
@@ -36,8 +38,8 @@ export function AppLayout() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="brand">
-          <span className="brand-mark">PZ</span>
-          <span className="brand-name">PlusZero CRM</span>
+          <img src={LOGO_SRC} alt="" className="brand-logo" width={36} height={36} decoding="async" />
+          <span className="brand-name">{ja.login.title}</span>
         </div>
         <nav className="sidebar-nav">
           {allowed.map((key) => {

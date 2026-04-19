@@ -1,19 +1,17 @@
 import { useMemo, useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
-import { loadUsers } from '../storage/appStorage'
 import { canManageAllTasks } from '../lib/permissions'
 import { ja } from '../locales'
 import type { TaskRecord } from '../types'
 
 export function TasksPage() {
   const j = ja.tasks
-  const { user } = useAuth()
+  const { user, users } = useAuth()
   const { data, upsertTask, removeTask } = useAppData()
   const role = user!.role
   const allTasks = canManageAllTasks(role)
 
-  const users = useMemo(() => loadUsers(), [])
   const userName = (id: string | null) => users.find((u) => u.id === id)?.name ?? ja.common.dash
 
   const [draft, setDraft] = useState<TaskRecord | null>(null)
