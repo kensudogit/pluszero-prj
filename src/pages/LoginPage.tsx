@@ -80,33 +80,6 @@ export function LoginPage() {
             <h1 className="login-title">{j.title}</h1>
           </div>
 
-          <div className="login-tabs" role="tablist">
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'login'}
-              className={mode === 'login' ? 'login-tab active' : 'login-tab'}
-              onClick={() => {
-                setMode('login')
-                setError('')
-              }}
-            >
-              {j.toggleLogin}
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={mode === 'register'}
-              className={mode === 'register' ? 'login-tab active' : 'login-tab'}
-              onClick={() => {
-                setMode('register')
-                setError('')
-              }}
-            >
-              {j.toggleRegister}
-            </button>
-          </div>
-
           {mode === 'login' ? (
             <>
               <p className="login-lead">{j.lead}</p>
@@ -153,9 +126,33 @@ export function LoginPage() {
                   </li>
                 </ul>
               </details>
+              <p className="login-footer-link">
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => {
+                    setMode('register')
+                    setError('')
+                  }}
+                >
+                  {j.toggleRegister}
+                </button>
+              </p>
             </>
           ) : (
             <>
+              <p className="login-back-row">
+                <button
+                  type="button"
+                  className="link-btn"
+                  onClick={() => {
+                    setMode('login')
+                    setError('')
+                  }}
+                >
+                  {j.backToLogin}
+                </button>
+              </p>
               <p className="login-lead">{j.registerLead}</p>
               <h2 className="login-subtitle">{j.registerTitle}</h2>
               <form className="form-stack" onSubmit={onRegister}>
