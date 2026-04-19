@@ -34,6 +34,15 @@
     "unassigned": "未割当",
     "permissionDenied": "権限がありません。"
   },
+  "quickSearch": {
+    "openButton": "クイック検索",
+    "placeholder": "案件・顧客・タスクを検索...",
+    "empty": "一致する結果がありません",
+    "hintKeys": "Ctrl+K で開く",
+    "sectionCases": "案件",
+    "sectionCustomers": "顧客",
+    "sectionTasks": "タスク"
+  },
   "login": {
     "title": "PlusZero CRM",
     "lead": "デモアカウントでログインしてください。",
@@ -75,7 +84,14 @@
     "seriesProfit": "利益",
     "summaryTitle": "サマリー",
     "summaryDesc": "案件・タスクから業務を進めてください。グラフはマネージャー以上で利用できます。",
-    "chartTickUnit": "万"
+    "chartTickUnit": "万",
+    "topByRevenue": "上位顧客（売上）",
+    "topByCases": "上位顧客（案件数）",
+    "colRevenueSum": "売上合計",
+    "colCaseCount": "案件数",
+    "overdueTitle": "期限超過タスク",
+    "overdueNone": "期限超過はありません",
+    "overdueColDue": "期限"
   },
   "cases": {
     "title": "案件一覧",
@@ -98,7 +114,15 @@
     "fieldPeriod": "計上月（YYYY-MM）",
     "statusDraft": "ドラフト",
     "statusActive": "進行中",
-    "statusClosed": "完了"
+    "statusClosed": "完了",
+    "filterKeyword": "キーワード",
+    "filterStatus": "状態",
+    "filterStatusAll": "すべて",
+    "filterCustomer": "顧客で絞り込み",
+    "filterCustomerAll": "すべて",
+    "sortHint": "並び替え: 列見出しをクリック",
+    "colUpdated": "更新",
+    "filterEmpty": "条件に一致する案件がありません。"
   },
   "tasks": {
     "title": "タスク",
@@ -120,7 +144,16 @@
     "hintAssignee": "担当の変更はマネージャー以上が行えます。自分のタスクは編集できます。",
     "statusTodo": "未着手",
     "statusDoing": "進行中",
-    "statusDone": "完了"
+    "statusDone": "完了",
+    "filterKeyword": "キーワード",
+    "filterStatusAll": "すべて",
+    "filterAssignee": "担当で絞り込み",
+    "filterAssigneeAll": "すべて",
+    "filterCase": "案件で絞り込み",
+    "filterCaseAll": "すべて",
+    "viewList": "一覧",
+    "viewBoard": "ボード",
+    "filterEmpty": "条件に一致するタスクがありません。"
   },
   "customers": {
     "title": "顧客",
@@ -134,7 +167,9 @@
     "fieldContact": "担当者名",
     "fieldEmail": "メール",
     "fieldPhone": "電話",
-    "fieldNote": "メモ"
+    "fieldNote": "メモ",
+    "filterKeyword": "キーワード",
+    "filterEmpty": "条件に一致する顧客がありません。"
   },
   "dataExchange": {
     "title": "データ連携",
@@ -271,6 +306,17 @@
           "ユーザー情報はブラウザのlocalStorage（鍵名 `pz_users`）に保存されます。検証用のためパスワードは暗文のまま保存されます本番環境では使用しないでください。",
           "管理者（admin）は自分で登録できません。管理者として利用する場合は、デモの `admin@demo.com` をご利用ください。",
           "登録したユーザーは「タスク」の担当選択などに表示されます。"
+        ]
+      },
+      {
+        "n": 10,
+        "title": "検索・分析・ボード",
+        "icon": "chart",
+        "bullets": [
+          "画面上部の「クイック検索」または Ctrl+K で案件・顧客・タスクを横断検索できます。",
+          "案件一覧はキーワード・状態・顧客で絞り込み、列見出しをクリックして並び替えできます。",
+          "タスクは一覧／ボード表示を切り替え、フィルタとカンバン型の列で進捗を俯瞰できます。",
+          "ダッシュボードには上位顧客と期限超過タスクのリストが表示されます。"
         ]
       }
     ]

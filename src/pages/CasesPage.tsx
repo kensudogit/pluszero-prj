@@ -1,4 +1,5 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
@@ -13,6 +14,12 @@ import {
 import { ja } from '../locales'
 import type { CaseRecord } from '../types'
 
+type SortKey = 'title' | 'customer' | 'status' | 'revenue' | 'profit' | 'period' | 'updatedAt'
+
+function norm(s: string) {
+  return s.trim().toLowerCase()
+}
+
 export function CasesPage() {
   const j = ja.cases
   const { user } = useAuth()
@@ -24,9 +31,84 @@ export function CasesPage() {
   const showCost = canViewFinanceDetail(role)
   const showRevOnly = canViewRevenueOnly(role)
 
+  const location = useLocation()
   const customersById = useMemo(() => new Map(data.customers.map((c) => [c.id, c])), [data.customers])
 
   const [draft, setDraft] = useState<CaseRecord | null>(null)
+  const [filterQ, setFilterQ] = useState('')
+  const [filterStatus, setFilterStatus] = useState<'all' | CaseRecord['status']>('all')
+  const [filterCustomer, setFilterCustomer] = useState<string>('all')
+  const [sortKey, setSortKey] = useState<SortKey>('updatedAt')
+  const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc')
+
+  useEffect(() => {
+    const id = location.hash.replace(/^#/, '')
+    if (!id) return
+    const el = document.getElementById(`case-row-${id}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    el?.classList.add('row-highlight')
+    const t = window.setTimeout(() => el?.classList.remove('row-highlight'), 2200)
+    return () => window.clearTimeout(t)
+  }, [location.hash])
+
+  const filteredCases = useMemo(() => {
+    let rows = data.cases
+    if (filterStatus !== 'all') rows = rows.filter((c) => c.status === filterStatus)
+    if (filterCustomer !== 'all') rows = rows.filter((c) => c.customerId === filterCustomer)
+    const q = norm(filterQ)
+    if (q) {
+      rows = rows.filter((c) => {
+        const cust = customersById.get(c.customerId)
+        const blob = [c.title, c.period, c.status, cust?.company, cust?.name].filter(Boolean).join(' ')
+        return norm(blob).includes(q)
+      })
+    }
+    return rows
+  }, [customersById, data.cases, filterCustomer, filterQ, filterStatus])
+
+  const sortedCases = useMemo(() => {
+    const rows = [...filteredCases]
+    const mul = sortDir === 'asc' ? 1 : -1
+    rows.sort((a, b) => {
+      const ca = customersById.get(a.customerId)?.company ?? ''
+      const cb = customersById.get(b.customerId)?.company ?? ''
+      const pa = a.revenue - a.cost
+      const pb = b.revenue - b.cost
+      switch (sortKey) {
+        case 'title':
+          return mul * a.title.localeCompare(b.title, 'ja')
+        case 'customer':
+          return mul * ca.localeCompare(cb, 'ja')
+        case 'status':
+          return mul * a.status.localeCompare(b.status)
+        case 'revenue':
+          return mul * (a.revenue - b.revenue)
+        case 'profit':
+          return mul * (pa - pb)
+        case 'period':
+          return mul * a.period.localeCompare(b.period)
+        case 'updatedAt':
+          return mul * (new Date(a.updatedAt).getTime() - new Date(b.updatedAt).getTime())
+        default:
+          return 0
+      }
+    })
+    return rows
+  }, [customersById, filteredCases, sortDir, sortKey])
+
+  function toggleSort(key: SortKey) {
+    if (sortKey !== key) {
+      setSortKey(key)
+      setSortDir(key === 'title' || key === 'customer' || key === 'period' ? 'asc' : 'desc')
+    } else {
+      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
+    }
+  }
+
+  function sortMark(key: SortKey) {
+    if (sortKey !== key) return ''
+    return sortDir === 'asc' ? ' \u2191' : ' \u2193'
+  }
 
   function startNew() {
     const now = new Date().toISOString()
@@ -57,6 +139,8 @@ export function CasesPage() {
     )
     downloadBlob(`cases_${Date.now()}.csv`, toCsv(headers, rows), 'text/csv;charset=utf-8')
   }
+
+  const tableColSpan = 6 + (showCost || showRevOnly ? 1 : 0) + (showCost ? 2 : 0)
 
   function importCsv(file: File) {
     const reader = new FileReader()
@@ -117,60 +201,144 @@ export function CasesPage() {
         </div>
       </header>
 
+      <p className="filter-hint muted">{j.sortHint}</p>
+
+      <div className="filter-bar card">
+        <label className="field compact">
+          <span>{j.filterKeyword}</span>
+          <input
+            type="search"
+            value={filterQ}
+            onChange={(e) => setFilterQ(e.target.value)}
+            autoComplete="off"
+          />
+        </label>
+        <label className="field compact">
+          <span>{j.filterStatus}</span>
+          <select
+            value={filterStatus}
+            onChange={(e) => setFilterStatus(e.target.value as typeof filterStatus)}
+          >
+            <option value="all">{j.filterStatusAll}</option>
+            <option value="draft">{j.statusDraft}</option>
+            <option value="active">{j.statusActive}</option>
+            <option value="closed">{j.statusClosed}</option>
+          </select>
+        </label>
+        <label className="field compact">
+          <span>{j.filterCustomer}</span>
+          <select value={filterCustomer} onChange={(e) => setFilterCustomer(e.target.value)}>
+            <option value="all">{j.filterCustomerAll}</option>
+            {data.customers.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.company}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+
       <div className="table-wrap card">
         <table className="data-table">
           <thead>
             <tr>
-              <th>{j.colTitle}</th>
-              <th>{j.colCustomer}</th>
-              <th>{j.colStatus}</th>
-              {showCost || showRevOnly ? <th>{j.colRevenue}</th> : null}
+              <th>
+                <button type="button" className="th-sort" onClick={() => toggleSort('title')}>
+                  {j.colTitle}
+                  {sortMark('title')}
+                </button>
+              </th>
+              <th>
+                <button type="button" className="th-sort" onClick={() => toggleSort('customer')}>
+                  {j.colCustomer}
+                  {sortMark('customer')}
+                </button>
+              </th>
+              <th>
+                <button type="button" className="th-sort" onClick={() => toggleSort('status')}>
+                  {j.colStatus}
+                  {sortMark('status')}
+                </button>
+              </th>
+              {showCost || showRevOnly ? (
+                <th>
+                  <button type="button" className="th-sort" onClick={() => toggleSort('revenue')}>
+                    {j.colRevenue}
+                    {sortMark('revenue')}
+                  </button>
+                </th>
+              ) : null}
               {showCost ? (
                 <>
                   <th>{j.colCost}</th>
-                  <th>{j.colProfit}</th>
+                  <th>
+                    <button type="button" className="th-sort" onClick={() => toggleSort('profit')}>
+                      {j.colProfit}
+                      {sortMark('profit')}
+                    </button>
+                  </th>
                 </>
               ) : null}
-              <th>{j.colPeriod}</th>
-              <th></th>
+              <th>
+                <button type="button" className="th-sort" onClick={() => toggleSort('period')}>
+                  {j.colPeriod}
+                  {sortMark('period')}
+                </button>
+              </th>
+              <th>
+                <button type="button" className="th-sort" onClick={() => toggleSort('updatedAt')}>
+                  {j.colUpdated}
+                  {sortMark('updatedAt')}
+                </button>
+              </th>
+              <th aria-hidden />
             </tr>
           </thead>
           <tbody>
-            {data.cases.map((c) => {
-              const cust = customersById.get(c.customerId)
-              const profit = c.revenue - c.cost
-              return (
-                <tr key={c.id}>
-                  <td>{c.title}</td>
-                  <td>{cust?.company ?? c.customerId}</td>
-                  <td>
-                    <span className={`pill status-${c.status}`}>{statusLabel(c.status)}</span>
-                  </td>
-                  {showCost || showRevOnly ? <td>{yen.format(c.revenue)}</td> : null}
-                  {showCost ? (
-                    <>
-                      <td>{yen.format(c.cost)}</td>
-                      <td className={profit < 0 ? 'neg' : ''}>{yen.format(profit)}</td>
-                    </>
-                  ) : null}
-                  <td>{c.period}</td>
-                  <td className="actions">
-                    {canEdit ? (
+            {sortedCases.length === 0 ? (
+              <tr>
+                <td colSpan={tableColSpan} className="muted">
+                  {j.filterEmpty}
+                </td>
+              </tr>
+            ) : (
+              sortedCases.map((c) => {
+                const cust = customersById.get(c.customerId)
+                const profit = c.revenue - c.cost
+                return (
+                  <tr key={c.id} id={`case-row-${c.id}`}>
+                    <td>{c.title}</td>
+                    <td>{cust?.company ?? c.customerId}</td>
+                    <td>
+                      <span className={`pill status-${c.status}`}>{statusLabel(c.status)}</span>
+                    </td>
+                    {showCost || showRevOnly ? <td>{yen.format(c.revenue)}</td> : null}
+                    {showCost ? (
                       <>
-                        <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
-                          {ja.common.edit}
-                        </button>
-                        <button type="button" className="link-btn danger" onClick={() => removeCase(c.id)}>
-                          {ja.common.delete}
-                        </button>
+                        <td>{yen.format(c.cost)}</td>
+                        <td className={profit < 0 ? 'neg' : ''}>{yen.format(profit)}</td>
                       </>
-                    ) : (
-                      <span className="muted">{ja.common.viewOnly}</span>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
+                    ) : null}
+                    <td>{c.period}</td>
+                    <td>{new Date(c.updatedAt).toLocaleDateString('ja-JP')}</td>
+                    <td className="actions">
+                      {canEdit ? (
+                        <>
+                          <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
+                            {ja.common.edit}
+                          </button>
+                          <button type="button" className="link-btn danger" onClick={() => removeCase(c.id)}>
+                            {ja.common.delete}
+                          </button>
+                        </>
+                      ) : (
+                        <span className="muted">{ja.common.viewOnly}</span>
+                      )}
+                    </td>
+                  </tr>
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>

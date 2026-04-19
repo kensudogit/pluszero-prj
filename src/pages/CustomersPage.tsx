@@ -1,4 +1,5 @@
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { uid, useAppData } from '../contexts/DataContext'
 import { downloadBlob, parseCsv, toCsv } from '../lib/csv'
@@ -6,8 +7,13 @@ import { canEditCustomers, canExportCsv, canImportCsv } from '../lib/permissions
 import { ja } from '../locales'
 import type { CustomerRecord } from '../types'
 
+function norm(s: string) {
+  return s.trim().toLowerCase()
+}
+
 export function CustomersPage() {
   const j = ja.customers
+  const location = useLocation()
   const { user } = useAuth()
   const { data, upsertCustomer, removeCustomer } = useAppData()
   const role = user!.role
@@ -16,6 +22,25 @@ export function CustomersPage() {
   const canIn = canImportCsv(role)
 
   const [draft, setDraft] = useState<CustomerRecord | null>(null)
+  const [filterQ, setFilterQ] = useState('')
+
+  useEffect(() => {
+    const id = location.hash.replace(/^#/, '')
+    if (!id) return
+    const el = document.getElementById(`customer-row-${id}`)
+    el?.scrollIntoView({ behavior: 'smooth', block: 'nearest' })
+    el?.classList.add('row-highlight')
+    const t = window.setTimeout(() => el?.classList.remove('row-highlight'), 2200)
+    return () => window.clearTimeout(t)
+  }, [location.hash])
+
+  const filteredCustomers = useMemo(() => {
+    const q = norm(filterQ)
+    if (!q) return data.customers
+    return data.customers.filter((c) =>
+      norm([c.company, c.name, c.email, c.phone, c.note].join(' ')).includes(q)
+    )
+  }, [data.customers, filterQ])
 
   function startNew() {
     setDraft({
@@ -97,6 +122,18 @@ export function CustomersPage() {
         </div>
       </header>
 
+      <div className="filter-bar card">
+        <label className="field compact wide">
+          <span>{j.filterKeyword}</span>
+          <input
+            type="search"
+            value={filterQ}
+            onChange={(e) => setFilterQ(e.target.value)}
+            autoComplete="off"
+          />
+        </label>
+      </div>
+
       <div className="table-wrap card">
         <table className="data-table">
           <thead>
@@ -106,33 +143,41 @@ export function CustomersPage() {
               <th>{ja.common.email}</th>
               <th>{ja.common.phone}</th>
               <th>{ja.common.note}</th>
-              <th></th>
+              <th />
             </tr>
           </thead>
           <tbody>
-            {data.customers.map((c) => (
-              <tr key={c.id}>
-                <td>{c.company}</td>
-                <td>{c.name}</td>
-                <td>{c.email}</td>
-                <td>{c.phone}</td>
-                <td className="cell-note">{c.note}</td>
-                <td className="actions">
-                  {canEdit ? (
-                    <>
-                      <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
-                        {ja.common.edit}
-                      </button>
-                      <button type="button" className="link-btn danger" onClick={() => removeCustomer(c.id)}>
-                        {ja.common.delete}
-                      </button>
-                    </>
-                  ) : (
-                    <span className="muted">{ja.common.viewOnly}</span>
-                  )}
+            {filteredCustomers.length === 0 ? (
+              <tr>
+                <td colSpan={6} className="muted">
+                  {j.filterEmpty}
                 </td>
               </tr>
-            ))}
+            ) : (
+              filteredCustomers.map((c) => (
+                <tr key={c.id} id={`customer-row-${c.id}`}>
+                  <td>{c.company}</td>
+                  <td>{c.name}</td>
+                  <td>{c.email}</td>
+                  <td>{c.phone}</td>
+                  <td className="cell-note">{c.note}</td>
+                  <td className="actions">
+                    {canEdit ? (
+                      <>
+                        <button type="button" className="link-btn" onClick={() => setDraft({ ...c })}>
+                          {ja.common.edit}
+                        </button>
+                        <button type="button" className="link-btn danger" onClick={() => removeCustomer(c.id)}>
+                          {ja.common.delete}
+                        </button>
+                      </>
+                    ) : (
+                      <span className="muted">{ja.common.viewOnly}</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

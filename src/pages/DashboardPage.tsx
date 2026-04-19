@@ -12,14 +12,18 @@ import {
 import { useAuth } from '../contexts/AuthContext'
 import { useAppData } from '../contexts/DataContext'
 import { yen } from '../lib/format'
-import { canViewFinanceDetail, canViewRevenueOnly } from '../lib/permissions'
+import {
+  canManageAllTasks,
+  canViewFinanceDetail,
+  canViewRevenueOnly,
+} from '../lib/permissions'
 import { interpolate, ja } from '../locales'
 
 export function DashboardPage() {
   const j = ja.dashboard
   const { user } = useAuth()
   const {
-    data: { cases, tasks },
+    data: { cases, tasks, customers },
   } = useAppData()
   const role = user!.role
 
@@ -57,6 +61,54 @@ export function DashboardPage() {
     const done = tasks.filter((t) => t.status === 'done').length
     return { todo, doing, done }
   }, [tasks])
+
+  const topCustomers = useMemo(() => {
+    const agg = new Map<string, { revenue: number; n: number }>()
+    for (const c of cases) {
+      const cur = agg.get(c.customerId) ?? { revenue: 0, n: 0 }
+      cur.revenue += c.revenue
+      cur.n += 1
+      agg.set(c.customerId, cur)
+    }
+    const rows = [...agg.entries()].map(([id, v]) => ({
+      id,
+      company: customers.find((x) => x.id === id)?.company ?? id,
+      revenue: v.revenue,
+      n: v.n,
+    }))
+    const detail = canViewFinanceDetail(role)
+    const revenueOnly = canViewRevenueOnly(role)
+    if (detail || revenueOnly) {
+      return [...rows].sort((a, b) => b.revenue - a.revenue).slice(0, 5)
+    }
+    return [...rows].sort((a, b) => b.n - a.n).slice(0, 5)
+  }, [cases, customers, role])
+
+  const overdueTasks = useMemo(() => {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return tasks
+      .filter((t) => {
+        if (t.status === 'done') return false
+        if (!t.dueDate) return false
+        const dd = new Date(t.dueDate)
+        dd.setHours(0, 0, 0, 0)
+        return dd.getTime() < today.getTime()
+      })
+      .sort((a, b) => {
+        const ta = a.dueDate ? new Date(a.dueDate).getTime() : 0
+        const tb = b.dueDate ? new Date(b.dueDate).getTime() : 0
+        return ta - tb
+      })
+      .slice(0, 8)
+  }, [tasks])
+
+  const visibleOverdue = useMemo(() => {
+    if (canManageAllTasks(role)) return overdueTasks
+    return overdueTasks.filter(
+      (t) => t.assigneeUserId === user!.id || t.assigneeUserId === null
+    )
+  }, [overdueTasks, role, user])
 
   const showFinance = canViewFinanceDetail(role) || canViewRevenueOnly(role)
   const detail = canViewFinanceDetail(role)
@@ -145,6 +197,66 @@ export function DashboardPage() {
           <p className="muted">{j.summaryDesc}</p>
         </section>
       )}
+
+      <section className="dashboard-split">
+        <div className="card">
+          <h2>{detail || revenueOnly ? j.topByRevenue : j.topByCases}</h2>
+          <div className="table-wrap compact-table">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>{ja.customers.colCompany}</th>
+                  {detail || revenueOnly ? <th>{j.colRevenueSum}</th> : null}
+                  <th>{j.colCaseCount}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topCustomers.map((row) => (
+                  <tr key={row.id}>
+                    <td>{row.company}</td>
+                    {detail || revenueOnly ? <td>{yen.format(row.revenue)}</td> : null}
+                    <td>{row.n}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div className="card">
+          <h2>{j.overdueTitle}</h2>
+          {visibleOverdue.length === 0 ? (
+            <p className="muted">{j.overdueNone}</p>
+          ) : (
+            <div className="table-wrap compact-table">
+              <table className="data-table">
+                <thead>
+                  <tr>
+                    <th>{ja.tasks.colTitle}</th>
+                    <th>{ja.tasks.colCase}</th>
+                    <th>{j.overdueColDue}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {visibleOverdue.map((t) => (
+                    <tr key={t.id}>
+                      <td>{t.title}</td>
+                      <td>
+                        {t.caseId
+                          ? cases.find((k) => k.id === t.caseId)?.title ?? ja.common.dash
+                          : ja.common.dash}
+                      </td>
+                      <td>
+                        {t.dueDate ? new Date(t.dueDate).toLocaleDateString('ja-JP') : ja.common.dash}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </section>
     </div>
   )
 }

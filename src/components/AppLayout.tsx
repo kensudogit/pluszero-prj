@@ -2,10 +2,11 @@ import { NavLink, Outlet } from 'react-router-dom'
 import type { Role } from '../types'
 import { useAuth } from '../contexts/AuthContext'
 import { useNotifications } from '../contexts/NotificationContext'
+import { menuForRole, type MenuKey } from '../lib/permissions'
 import { ja } from '../locales'
+import { QuickSearch } from './QuickSearch'
 
 const LOGO_SRC = '/pc.png'
-import { menuForRole, type MenuKey } from '../lib/permissions'
 
 const paths: Record<MenuKey, string> = {
   dashboard: '/',
@@ -67,6 +68,9 @@ export function AppLayout() {
         </div>
       </aside>
       <main className="main-area">
+        <div className="main-toolbar">
+          <QuickSearch />
+        </div>
         <Outlet />
       </main>
     </div>
