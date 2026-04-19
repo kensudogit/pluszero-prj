@@ -309,7 +309,10 @@ export function ReportsPage() {
                   <XAxis dataKey="period" tick={{ fontSize: 11 }} />
                   <YAxis tickFormatter={(v) => `${Math.round(v / 10000)}`} tick={{ fontSize: 11 }} />
                   <Tooltip
-                    formatter={(value: number, name: string) => [yen.format(value), name]}
+                    formatter={(value, name) => [
+                      yen.format(Number(value ?? 0)),
+                      typeof name === 'string' ? name : String(name ?? ''),
+                    ]}
                     labelFormatter={(l) => String(l)}
                   />
                   <Legend />
@@ -347,7 +350,7 @@ export function ReportsPage() {
                         <Cell key={entry.key} fill={STATUS_COLORS[entry.key]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => `${v} ${j.colCases}`} />
+                    <Tooltip formatter={(value) => `${Number(value ?? 0)} ${j.colCases}`} />
                   </PieChart>
                 </ResponsiveContainer>
               </div>
